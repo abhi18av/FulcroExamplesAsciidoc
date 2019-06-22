@@ -91,4 +91,4 @@ include::src/recursive_demo_2.cljs[]
 
 
 
-example::mojavelinux/5546622[]
+example::victory_example[]
