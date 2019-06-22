@@ -2,13 +2,17 @@
 
 A block macro that embeds a Fulcro example into the output document
 
-This repo contains the POC 
+This repo contains the the FulcroExamples extension script which neatly embeds the examples in the official Fulcro Developer's Guide.
 
 == Usage
 
+[source,]
+----
 example::[example_name, example_id, example_source]
-example::[victory_name, victory_id, ./src/victory_example.cljs]
 
-NOTE: Possible Improvements
-- take short/narrow as arguments
+example::[victory_name, victory_id, ./src/victory_example.cljs]
+----
+
+== Possible Improvements
+- Take short/narrow as arguments
 
