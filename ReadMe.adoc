@@ -32,3 +32,5 @@ $ task fulcro
 == Possible Improvements
 - Take short/narrow as arguments
 
+== TODO
+- Read the list of examples from the `defexample` within closure
