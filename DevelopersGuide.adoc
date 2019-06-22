@@ -90,5 +90,8 @@ include::src/recursive_demo_2.cljs[]
 
 
 
-
+.[[VICTORY]]<<{VICTORY}>>
+====
 example::victory_example[]
+
+====
