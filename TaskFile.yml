@@ -1,6 +1,10 @@
 version: '1'
 
 tasks:
-  book:
+  fulcro:
     cmds:
-      - asciidoctor -o ./onlyExamples.adoc  -b html5 -r asciidoctor-diagram ./onlyExamples.adoc 
+      - asciidoctor -o DevelopersGuide.html -b html5 -r asciidoctor-diagram -r ./register-fulcro-examples.rb DevelopersGuide.adoc
+  gist:
+    cmds:
+      - asciidoctor -o DevelopersGuide.html -b html5 -r asciidoctor-diagram -r ./register-gist-macro.rb DevelopersGuide.adoc
+
