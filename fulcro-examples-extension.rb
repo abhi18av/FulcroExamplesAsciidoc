@@ -1,27 +1,26 @@
-require 'asciidoctor'
-require 'asciidoctor/extensions'
+include Asciidoctor
 
-class FulcroExamplesMacro < Asciidoctor::Extensions::BlockMacroProcessor
+# A block macro that embeds a Gist into the output document
+#
+# Usage
+#
+#   gist::12345[]
+#
+class FulcroExamplesBlockMacro < Extensions::BlockMacroProcessor
   use_dsl
 
   named :example
 
-  def process example_title, example_id, file_name
+  def process parent, target, attrs
+    title_html = (attrs.has_key? 'title') ?
+      %(<div class="title">#{attrs['title']}</div>\n) : nil
 
-    html = %(
-.[[#{example_title}]]<<#{example_title},D3>>
-====
-++++
-<button class="inspector" onClick="book.main.focus('#{example_id}')">Focus Inspector</button>
-<div class="short narrow example" id="#{example_id}"></div>
-<br/>
-++++
-[source,clojure,role="source"]
-----
-include::#{file_name}[]
-----
-)
+    html = %(<div class="openblock gist">
+#{title_html}<div class="content">
+<script src="https://gist.github.com/#{target}.js"></script>
+</div>
+</div>)
 
-    create_pass_block example_title, example_id, file_name, html, subs: nil
+    create_pass_block parent, html, attrs, subs: nil
   end
 end

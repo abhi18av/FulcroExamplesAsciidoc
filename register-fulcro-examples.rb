@@ -2,7 +2,7 @@
 
 Asciidoctor::Extensions.register do
   if (@document.basebackend? 'html') && (@document.safe < SafeMode::SECURE)
-    block_macro GistBlockMacro
+    block_macro FulcroExamplesBlockMacro
   end
 end
 
