@@ -1,4 +1,3 @@
-= Gist Block Macro Extension
 
 .Guard setup to live preview AsciiDoc output
 gist::mojavelinux/5546622[]
@@ -26,68 +25,7 @@ gist::mojavelinux/5546622[]
 ----
 include::src/example_1.cljs[]
 ----
-
-
-// D3Example is just invented for asciidoc anchor
-// D3 is the title, which comes from the 1st arg of the defexample in book/main.cljs
-// ui-d3 is the 3rd arg of the defexample
-.[[D3Example]]<<D3Example,D3>>
 ====
-
-++++
-<button class="inspector" onClick="book.main.focus('ui-d3')">Focus Inspector</button>
-<div class="short narrow example" id="ui-d3"></div>
-<br/>
-++++
-
-[source,clojure,role="source"]
-----
-include::src/d3_example.cljs[]
-----
-
-
-.[[Focusing]]<<Focusing, Focusing an input>>
-====
-
-++++
-<button class="inspector" onClick="book.main.focus('focus-example')">Focus Inspector</button>
-<div class="short narrow example" id="focus-example"> </div>
-<br/>
-++++
-
-[source,clojure,role="focus-example source"]
-----
-include::src/focus_example.cljs[]
-----
-
-====
-++++
-<div class="example" id="union-example-1"> </div>
-<a class="source-toggle" href="javascript:void(0)" onClick="$('.union-example-1').toggle()">Show/Hide Source</a>
-++++
-
-[source,clojure,role="union-example-1 source"]
-----
-include::src/union_example_1.cljs[]
-----
-
-====
-++++
-<div class="example" id="recursive-demo-2"> </div>
-<a class="source-toggle" href="javascript:void(0)" onClick="$('.recursive-demo-2').toggle()">Show/Hide Source</a>
-++++
-
-[source,clojure,role="recursive-demo-2 source"]
-----
-include::src/recursive_demo_2.cljs[]
-----
-====
-- d3_example.cljs
-- example_1.cljs
-- focus_example.cljs
-- hover_example.cljs
-- victory_example.cljs
-
 
 
 .[[VICTORY]]<<VICTORY, Victory Example>>
@@ -95,11 +33,3 @@ include::src/recursive_demo_2.cljs[]
 example::victory_example[]
 
 ====
-[source,clojure,role="source"]
-----
-include::./src/victory_example.cljs[]
-----
-
-
-
-
