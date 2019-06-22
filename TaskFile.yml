@@ -1,0 +1,6 @@
+version: '1'
+
+tasks:
+  book:
+    cmds:
+      - asciidoctor -o ./onlyExamples.adoc  -b html5 -r asciidoctor-diagram ./onlyExamples.adoc 
