@@ -2,9 +2,12 @@
 
 A block macro that embeds a Fulcro example into the output document
 
-This repo contains the the FulcroExamples extension script which neatly embeds the examples in the official Fulcro Developer's Guide.
+This repo contains the the FulcroExamples ruby extension script which neatly embeds the examples in the official `Fulcro Developer's Guide`.
 
-== Usage
+
+The repo contains a stripped down version of the original document for testing purposes.
+
+== Invocation in the `asciidoc` source file
 
 [source,]
 ----
@@ -13,6 +16,17 @@ example::[example_name, example_id, example_source]
 
 #specific
 example::[victory_name, victory_id, ./src/victory_example.cljs]
+----
+
+== On the terminal
+
+[source,]
+----
+# using GNU make
+$ make book
+
+# using go-task
+$ task fulcro
 ----
 
 == Possible Improvements
