@@ -28,8 +28,9 @@ include::src/example_1.cljs[]
 ====
 
 
-.[[VICTORY]]<<VICTORY, Victory Example>>
-====
-example::victory_example[]
 
-====
+example::[victory_name, victory_id, ./src/victory_example.cljs]
+
+
+
+

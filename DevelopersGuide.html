@@ -474,17 +474,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 2. <a id="VICTORY"></a><a href="#VICTORY">Victory Example</a></div>
+<div class="title">Example <a id="victory_name"></a><a href="#victory_name">victory_name</a></div>
 <div class="content">
-<button class="inspector" onClick="book.main.focus('victory_example')">Focus Inspector</button>
-<div class="short narrow example" id="victory_example"></div>
-<br/>
-
-
+<button class="inspector" onclick="book.main.focus('victory_id')">Focus Inspector</button>
+<div class="short narrow example" id="victory_id"></div>
+<br>
 <div class="listingblock source">
 <div class="content">
-<pre class="highlight"><code class="language-clojure" data-lang="clojure">
-(ns book.ui.victory-example
+  <pre class="highlight">
+    <code class="language-clojure" data-lang="clojure"> (ns book.ui.victory-example
   (:require
     [cljs.pprint :refer [cl-format]]
     ;; REQUIRES shadow-cljs, with "victory" in package.json
@@ -576,8 +574,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
     (yearly-value-chart props)))
 
 
-</code>
-</pre>
+    </code>
+  </pre>
 </div>
 </div>
 </div>
@@ -585,7 +583,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-06-22 21:50:36 +0530
+Last updated 2019-06-22 22:42:22 +0530
 </div>
 </div>
 </body>
