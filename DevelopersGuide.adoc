@@ -90,8 +90,12 @@ include::src/recursive_demo_2.cljs[]
 
 
 
-.[[VICTORY]]<<{VICTORY}>>
+.[[VICTORY]]<<VICTORY, Victory Example>>
 ====
 example::victory_example[]
 
 ====
+[source,clojure,role="source"]
+----
+include::./src/victory_example.cljs[]
+----
