@@ -8,8 +8,10 @@ This repo contains the the FulcroExamples extension script which neatly embeds t
 
 [source,]
 ----
+#generic
 example::[example_name, example_id, example_source]
 
+#specific
 example::[victory_name, victory_id, ./src/victory_example.cljs]
 ----
 
