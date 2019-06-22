@@ -1,0 +1,14 @@
+== ReadMe
+
+A block macro that embeds a Fulcro example into the output document
+
+This repo contains the POC 
+
+== Usage
+
+example::[example_name, example_id, example_source]
+example::[victory_name, victory_id, ./src/victory_example.cljs]
+
+NOTE: Possible Improvements
+- take short/narrow as arguments
+
