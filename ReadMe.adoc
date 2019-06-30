@@ -1,36 +1,143 @@
 == ReadMe
 
-A block macro that embeds a Fulcro example into the output document
+This repo contains the the FulcroExamples ruby extension script which embeds the examples in the official `Fulcro Developer's Guide`.
 
-This repo contains the the FulcroExamples ruby extension script which neatly embeds the examples in the official `Fulcro Developer's Guide`.
+== Overview 
 
-
-The repo contains a stripped down version of the original document for testing purposes.
-
-== Invocation in the `asciidoc` source file
+- Add the `$example$` invocation with correct parameters in the `DevelopersGuideSource.adoc` for an example.
 
 [source,]
 ----
-#generic
-example::[example_name, example_id, example_source]
-
-#specific
-example::[victory_name, victory_id, ./src/victory_example.cljs]
+$example$ D3,ui-d3,src/book/ui/d3_example.cljs
 ----
+
+- The second step is to expand all such invocations into a proper Asciidoc markup. This is done by calling the following command on the terminal
+```
+$ asciidoctor  -r ./register-fulcro-examples.rb DevelopersGuideSource.adoc
+
+# Delete the extra DevelopersGuideSource.html
+$ rm -rf DevelopersGuideSource.html
+
+
+```
+
+- Finally, we create the Asciidoc outputs such as HTML using the following command
 
 == On the terminal
 
+```
+asciidoctor -o DevelopersGuide.html -b html5  -r asciidoctor-diagram DevelopersGuide.adoc
+
+```
+
+== The list of fulcro examples
+
+
 [source,]
 ----
-# using GNU make
-$ make book
+$example$ Sample Example,example-1,src/book/example_1.cljs
 
-# using go-task
-$ task fulcro
+$example$ D3,ui-d3,src/book/ui/d3_example.cljs
+
+$example$ Input Focus and React Refs Lifecycle,focus-example,src/book/ui/focus_example.cljs
+
+$example$ Drawing in a Canvas,hover-example,src/book/ui/hover_example.cljs
+
+$example$ Using External React Libraries,victory-example,src/book/ui/victory_example.cljs
+
+$example$ Unions to Select Type,union-example-1,src/book/queries/union_example_1.cljs
+
+$example$ UI Blocking,ui-blocking-example,src/book/server/ui_blocking_example.cljs
+
+$example$ Dynamic Query,dynamic-queries,src/book/queries/dynamic_queries.cljs
+
+$example$ Dynamic Query Parameters,dynamic-query-parameters,src/book/queries/dynamic_query_parameters.cljs
+
+$example$ Routing Demo,ui-routing,src/book/ui_routing.cljs
+
+$example$ Simple Router,simple-router-1,src/book/simple_router_1.cljs
+
+$example$ Nested Router,simple-router-2,src/book/simple_router_2.cljs
+
+$example$ Tree to DB with Queries,tree-to-db,src/book/tree_to_db.cljs
+
+$example$ Merging with a Component,merge-component,src/book/merge_component.cljs
+
+$example$ HTML Converter,html-converter,src/book/html_converter.cljs
+
+$example$ Editing Existing Data,form-state-demo-1,src/book/forms/form_state_demo_1.cljs
+
+$example$ Network Interactions and Forms,form-state-demo-2,src/book/forms/form_state_demo_2.cljs
+
+$example$ Autocomplete,autocomplete-demo,src/book/demos/autocomplete.cljs
+
+$example$ Cascading Dropdowns,cascading-dropdowns,src/book/demos/cascading_dropdowns.cljs
+
+$example$ Dynamic UI Routing,dynamic-ui-routing,src/book/demos/dynamic_ui_routing.cljs
+
+$example$ Recursive Demo 1,recursive-demo-1,src/book/queries/recursive_demo_1.cljs
+
+$example$ Recursive Demo 2,recursive-demo-2,src/book/queries/recursive_demo_2.cljs
+
+$example$ Recursive Demo 3,recursive-demo-3,src/book/queries/recursive_demo_3.cljs
+
+$example$ Recursive Demo 4,recursive-demo-bullets,src/book/queries/recursive_demo_bullets.cljs
+
+$example$ Loading Data Basics,loading-data-basics,src/book/demos/loading_data_basics.cljs
+
+$example$ Loading Data and Targeting Entities,loading-data-targeting-entities,src/book/demos/loading_data_targeting_entities.cljs
+
+$example$ Loading In Response To UI Routing,loading-in-response-to-UI-routing,src/book/demos/loading_in_response_to_UI_routing.cljs
+
+$example$ Loading Indicators,loading-indicators,src/book/demos/loading_indicators.cljs
+
+$example$ Initial State,initial-app-state,src/book/demos/initial_app_state.cljs
+
+$example$ Legacy Load Indicators,legacy-load-indicators,src/book/demos/legacy_load_indicators.cljs
+
+$example$ Paginating Lists From Server,paginating-large-lists-from-server,src/book/demos/paginating_large_lists_from_server.cljs
+
+$example$ Parallel vs. Sequential Loading,parallel-vs-sequential-loading,src/book/demos/parallel_vs_sequential_loading.cljs
+
+$example$ Parent-Child Ownership,parent-child-ownership-relations,src/book/demos/parent_child_ownership_relations.cljs
+
+$example$ Pre merge - using post mutations,pre-merge-postmutations,src/book/demos/pre_merge/post_mutation_countdown.cljs
+
+$example$ Pre merge - using post mutations to many,pre-merge-postmutations-many,src/book/demos/pre_merge/post_mutation_countdown_many.cljs
+
+$example$ Pre merge,countdown-single,src/book/demos/pre_merge/countdown.cljs
+
+$example$ Pre merge - to many,countdown-many,src/book/demos/pre_merge/countdown_many.cljs
+
+$example$ Pre merge - with initial,countdown-with-initial,src/book/demos/pre_merge/countdown_with_initial.cljs
+
+$example$ Pre merge - extracted ui,countdown-extracted,src/book/demos/pre_merge/countdown_extracted.cljs
+
+$example$ Pre merge - initial,state countdown-initial-state,src/book/demos/pre_merge/countdown_initial_state.cljs
+
+$example$ Pre merge - mutation,countdown-mutation,src/book/demos/pre_merge/countdown_mutation.cljs
+
+$example$ Error Handling,server-error-handling,src/book/demos/server_error_handling.cljs
+
+$example$ Query Security,server-query-security,src/book/demos/server_query_security.cljs
+
+$example$ Return Values and Mutation Joins,server-return-values-as-data-driven-mutation-joins,src/book/demos/server_return_values_as_data_driven_mutation_joins.cljs
+
+$example$ Manually Merging Server Mutation Return Values,server-return-values-manually-merging,src/book/demos/server_return_values_manually_merging.cljs
+
+$example$ Targeting Mutation Return Values,server-targeting-return-values-into-app-state,src/book/demos/server_targeting_return_values_into_app_state.cljs
+
+
 ----
+
+
+
+
+
+
 
 == Possible Improvements
 - Take short/narrow as arguments
 
 == TODO
-- Read the list of examples from the `defexample` within closure
+- Read the list of examples from the `defexample` within clojure. As of now, this is done by vim macros i.e. almost manually. 
