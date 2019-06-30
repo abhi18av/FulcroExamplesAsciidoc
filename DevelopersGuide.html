@@ -440,10 +440,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 </div>
 <div id="content">
-<div class="paragraph">
-<div class="title">Guard setup to live preview AsciiDoc output</div>
-<p>gist::mojavelinux/5546622[]</p>
-</div>
 <div class="exampleblock">
 <div class="title">Example 1. <a id="SampleExample"></a><a href="#SampleExample">Sample Example</a></div>
 <div class="content">
@@ -473,18 +469,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">include</dt>
-<dd>
-<p>src/book/book/ui/victory_example.cljs[]</p>
-</dd>
-</dl>
+<div class="paragraph">
+<p>Second attempt</p>
+</div>
+<div class="paragraph">
+<p>
+.<a id="SampleExample"></a><a href="#SampleExample">Sample Example</a>
+====
++
+<button class="inspector" onClick="book.main.focus('victory_name')">Focus Inspector</button>
+<div class="short narrow example" id="victory_id"></div>
+<br/>
++
+[source,clojure,role="source"]
+----
+include::src/victory_example.cljs[]
+----
+====
+</p>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-06-30 20:44:53 +0530
+Last updated 2019-06-30 21:40:14 +0530
 </div>
 </div>
 </body>

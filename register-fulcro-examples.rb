@@ -2,7 +2,7 @@
 
 
 Asciidoctor::Extensions.register do
-  preprocessor TeXPreprocessor
+  preprocessor FulcroPreprocessor
 end
 
 

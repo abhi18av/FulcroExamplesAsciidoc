@@ -8,3 +8,7 @@ tasks:
   extension:
     cmds:
       - asciidoctor -r asciidoctor-diagram -r ./register-fulcro-examples.rb DevelopersGuide.adoc
+
+  expanded:
+    cmds:
+      - asciidoctor -o ExpandedSource.html -b html5 ExpandedSource.adoc
