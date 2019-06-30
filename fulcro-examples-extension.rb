@@ -2,7 +2,7 @@
 #
 # Usage
 #
-#   $example$ "victory_name", "victory_id", "./src/victory_example.cljs"]
+#   $example$ "Using External React Libraries", "victory_id", "./src/victory_example.cljs"]
 #
 ##############
 #   Which in turn gets converted into
@@ -12,8 +12,8 @@
   .[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
   ====
   ++++
-  <button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
-  <div class="short narrow example" id="victory-example"></div>
+  <button class="inspector" onClick="book.main.focus('victory-id')">Focus Inspector</button>
+  <div class="short narrow example" id="victory-id"></div>
   <br/>
   ++++
   [source,clojure,role="source"]
@@ -33,11 +33,13 @@ include Asciidoctor
 
 
 def create_asciidoc_block example_name, example_id, example_source
+
+  anchor_name = example_name.gsub!(/\s+/, '')
   return %{
-.[[SampleExample]]<<SampleExample,Sample Example>>
+.[[#{anchor_name}]]<<#{anchor_name},#{example_name}>>
 ====
 ++++
-<button class="inspector" onClick="book.main.focus('#{example_name}')">Focus Inspector</button>
+<button class="inspector" onClick="book.main.focus('#{example_id}')">Focus Inspector</button>
 <div class="short narrow example" id="#{example_id}"></div>
 <br/>
 ++++
