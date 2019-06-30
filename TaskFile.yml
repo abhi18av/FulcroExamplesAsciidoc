@@ -1,14 +1,11 @@
 version: '1'
 
 tasks:
-  html:
+  expand: # this results in the generation of the expanded DevelopersGuide as a side-effect of running the extension
+    cmds: 
+      - asciidoctor -r asciidoctor-diagram -r ./register-fulcro-examples.rb DevelopersGuideSource.adoc
+      - rm -rf DevelopersGuideSource.html
+  book:
     cmds:
-      - asciidoctor -o DevelopersGuide.html -b html5 -r asciidoctor-diagram -r ./register-fulcro-examples.rb DevelopersGuide.adoc
+      - asciidoctor -o DevelopersGuide.html -b html5 DevelopersGuide.adoc
 
-  extension:
-    cmds:
-      - asciidoctor -r asciidoctor-diagram -r ./register-fulcro-examples.rb DevelopersGuide.adoc
-
-  expanded:
-    cmds:
-      - asciidoctor -o ExpandedSource.html -b html5 ExpandedSource.adoc

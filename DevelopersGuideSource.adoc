@@ -41,32 +41,8 @@
 
 Second attempt
 
-
-.[[SampleExample]]<<SampleExample,Sample Example>>
-====
-++++
-<button class="inspector" onClick="book.main.focus('d3')">Focus Inspector</button>
-<div class="short narrow example" id="d3-id"></div>
-<br/>
-++++
-[source,clojure,role="source"]
-----
-include::src/d3_example.cljs[]
-----
-====
+$example$ d3, d3-id, src/d3_example.cljs
 
 //Third attempt
 
-
-.[[SampleExample]]<<SampleExample,Sample Example>>
-====
-++++
-<button class="inspector" onClick="book.main.focus('hover')">Focus Inspector</button>
-<div class="short narrow example" id="hover-id"></div>
-<br/>
-++++
-[source,clojure,role="source"]
-----
-include::src/hover_example.cljs[]
-----
-====
+//$example$ hover, hover-id, src/hover_example.cljs

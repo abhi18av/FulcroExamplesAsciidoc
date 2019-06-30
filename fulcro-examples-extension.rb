@@ -2,25 +2,27 @@
 #
 # Usage
 #
-#   $example$ "example_name", "example_id", "example_source"]
 #   $example$ "victory_name", "victory_id", "./src/victory_example.cljs"]
-##############
-#   This gets converted into
-##############
 #
-# .[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
-#   ====
-#   ++++
-#   <button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
-#   <div class="short narrow example" id="victory-example"></div>
-#   <br/>
-#   ++++
-#   [source,clojure,role="source"]
-#   ----
-#   include::src/book/book/ui/victory_example.cljs[]
-#   ----
-#   ====
-#
+##############
+#   Which in turn gets converted into
+##############
+=begin
+
+  .[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
+  ====
+  ++++
+  <button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
+  <div class="short narrow example" id="victory-example"></div>
+  <br/>
+  ++++
+  [source,clojure,role="source"]
+  ----
+  include::src/book/book/ui/victory_example.cljs[]
+  ----
+  ====
+
+=end
 
 
 require 'asciidoctor/extensions'
@@ -49,7 +51,6 @@ end
 
 
 
-
 class FulcroPreprocessor < Extensions::Preprocessor
   def process document, reader
     return reader if reader.eof?
@@ -69,11 +70,9 @@ class FulcroPreprocessor < Extensions::Preprocessor
         line
       end
     end
-    # TODO
+    # TODO Remove the generation of the intermediate Expanded file
     reader.unshift_all(replacement_lines)
+    File.open("DevelopersGuide.adoc", "w") { |file| file.puts reader.lines}
     reader
-    # NOTE Dumping all the lines from the reader to the console.
-    #puts reader.lines
-    File.open("ExpandedAsciiDocSource.adoc", "w") { |file| file.puts reader.lines}
   end
 end
