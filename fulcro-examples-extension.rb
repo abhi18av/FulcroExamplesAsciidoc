@@ -13,13 +13,20 @@ include Asciidoctor
 class TeXPreprocessor < Extensions::Preprocessor
 
   # Map $...$ to stem:[...]
-  TEX_DOLLAR_RX = /(^|\s|\()\$(.*?)\$($|\s|\)|,|\.)/
-  TEX_DOLLAR_SUB = '\1latexmath:[\2]\3'
+  exampleShortForm = /(^|\s|\()\$(.*?)\$($|\s|\)|,|\.)/
+  exampleFullForm = '\1latexmath:[\2]\3'
 
   def process document, reader
     return reader if reader.eof?
     replacement_lines = reader.read_lines.map do |line|
-      (line.include? '$') ? (line.gsub TEX_DOLLAR_RX, TEX_DOLLAR_SUB) : line
+      if(line.include? '$example$')
+        parameters = line.split("$")[2]
+        puts parameters.split(",")[0]
+        puts parameters.split(",")[1]
+        puts parameters.split(",")[2]
+        (line.gsub exampleShortForm, exampleFullForm)
+      else line
+      end
     end
     reader.unshift_lines replacement_lines
     reader
