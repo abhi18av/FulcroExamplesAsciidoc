@@ -25,3 +25,5 @@ class FrontMatterPreprocessor < Asciidoctor::Extensions::Preprocessor
     reader
   end
 end
+
+puts("Hello Extension")

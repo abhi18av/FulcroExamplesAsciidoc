@@ -32,5 +32,6 @@ include::src/example_1.cljs[]
 example::[victory_name, victory_id, ./src/victory_example.cljs]
 
 
+$example$ "victory_name", "victory_id", "./src/victory_example.cljs"
 
 
