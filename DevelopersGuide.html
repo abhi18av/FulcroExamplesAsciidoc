@@ -470,13 +470,42 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Second attempt</p>
+<p>All examples now</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 2. <a id="SampleExample"></a><a href="#SampleExample">Sample Example</a></div>
 <div class="content">
-<button class="inspector" onClick="book.main.focus('d3')">Focus Inspector</button>
-<div class="short narrow example" id="d3-id"></div>
+<button class="inspector" onClick="book.main.focus('example-1')">Focus Inspector</button>
+<div class="short narrow example" id="example-1"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.example-1
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+    [com.fulcrologic.fulcro.dom :as dom]))
+
+(defmutation bump-number [ignored]
+  (action [{:keys [state]}]
+    (swap! state update :ui/number inc)))
+
+(defsc Root [this {:ui/keys [number]}]
+  {:query         [:ui/number]
+   :initial-state {:ui/number 0}}
+  (dom/div
+    (dom/h4 "This is an example.")
+    (dom/button {:onClick #(comp/transact! this `[(bump-number {})])}
+      "You've clicked this button " number " times.")))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. <a id="D3"></a><a href="#D3">D3</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('ui-d3')">Focus Inspector</button>
+<div class="short narrow example" id="ui-d3"></div>
 <br/>
 <div class="listingblock source">
 <div class="content">
@@ -565,10 +594,61 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 3. <a id="SampleExample"></a><a href="#SampleExample">Sample Example</a></div>
+<div class="title">Example 4. <a id="InputFocusandReactRefsLifecycle"></a><a href="#InputFocusandReactRefsLifecycle">Input Focus and React Refs Lifecycle</a></div>
 <div class="content">
-<button class="inspector" onClick="book.main.focus('hover')">Focus Inspector</button>
-<div class="short narrow example" id="hover-id"></div>
+<button class="inspector" onClick="book.main.focus('focus-example')">Focus Inspector</button>
+<div class="short narrow example" id="focus-example"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.ui.focus-example
+  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.dom :as dom]
+            [com.fulcrologic.fulcro.mutations :as m]
+            [goog.object :as gobj]))
+
+(defsc ClickToEditField [this {:keys [value editing?]}]
+  {:initial-state      {:value    "ABC"
+                        :db/id    1
+                        :editing? false}
+   :query              [:db/id :value :editing?]
+   :ident              [:field/by-id :db/id]
+   :initLocalState     (fn [this]
+                         {:save-ref (fn [r] (gobj/set this "input-ref" r))})
+   :componentDidUpdate (fn [this prev-props _]
+                         (when (and (not (:editing? prev-props)) (:editing? (comp/props this)))
+                           (when-let [input-field (gobj/get this "input-ref")]
+                             (.focus input-field))))}
+  (let [save-ref (comp/get-state this :save-ref)]
+    (dom/div
+      ; trigger a focus based on a state change (componentDidUpdate)
+      (dom/a {:onClick #(m/toggle! this :editing?)}
+        "Click to focus (if not already editing): ")
+      (dom/input {:value    value
+                  :onChange #(m/set-string! this :event %)
+                  :ref      save-ref})
+      ; do an explicit focus
+      (dom/button {:onClick (fn []
+                              (when-let [input-field (gobj/get this "input-ref")]
+                                (.focus input-field)
+                                (.setSelectionRange input-field 0 (.. input-field -value -length))))}
+        "Highlight All"))))
+
+(def ui-click-to-edit (comp/factory ClickToEditField))
+
+(defsc Root [this {:keys [field] :as props}]
+  {:query         [{:field (comp/get-query ClickToEditField)}]
+   :initial-state {:field {}}}
+  (ui-click-to-edit field))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 5. <a id="DrawinginaCanvas"></a><a href="#DrawinginaCanvas">Drawing in a Canvas</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('hover-example')">Focus Inspector</button>
+<div class="short narrow example" id="hover-example"></div>
 <br/>
 <div class="listingblock source">
 <div class="content">
@@ -702,10 +782,3686 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
+<div class="exampleblock">
+<div class="title">Example 6. <a id="UsingExternalReactLibraries"></a><a href="#UsingExternalReactLibraries">Using External React Libraries</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
+<div class="short narrow example" id="victory-example"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.ui.victory-example
+  (:require
+    [cljs.pprint :refer [cl-format]]
+    ;; REQUIRES shadow-cljs, with "victory" in package.json
+    ["victory" :refer [VictoryChart VictoryAxis VictoryLine]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.algorithms.misc :as util]
+    [taoensso.timbre :as log]))
+
+(defn us-dollars [n]
+  (str "$" (cl-format nil "~:d" n)))
+
+(defn factory-force-children
+  [class]
+  (fn [props &amp; children]
+    (js/React.createElement class
+      props
+      (util/force-children children))))
+
+(defn factory-apply
+  [class]
+  (fn [props &amp; children]
+    (apply js/React.createElement
+      class
+      props
+      children)))
+
+(def vchart (factory-apply VictoryChart))
+(def vaxis (factory-apply VictoryAxis))
+(def vline (factory-apply VictoryLine))
+
+;; " [ {:year 1991 :value 2345 } ...] "
+(defsc YearlyValueChart [this {:keys [label plot-data x-step]}]
+  (let [start-year (apply min (map :year plot-data))
+        end-year   (apply max (map :year plot-data))
+        years      (range start-year (inc end-year) x-step)
+        dates      (clj-&gt;js (mapv #(new js/Date % 1 2) years))
+        {:keys [min-value
+                max-value]} (reduce (fn [{:keys [min-value max-value] :as acc}
+                                         {:keys [value] :as n}]
+                                      (assoc acc
+                                        :min-value (min min-value value)
+                                        :max-value (max max-value value)))
+                              {}
+                              plot-data)
+        min-value  (int (* 0.8 min-value))
+        max-value  (int (* 1.2 max-value))
+        points     (clj-&gt;js (mapv (fn [{:keys [year value]}]
+                                    {:x (new js/Date year 1 2)
+                                     :y value})
+                              plot-data))]
+    (vchart nil
+      (vaxis #js {:label      label
+                  :standalone false
+                  :scale      "time"
+                  :tickFormat (fn [d] (.getFullYear d))
+                  :tickValues dates})
+      (vaxis #js {:dependentAxis true
+                  :standalone    false
+                  :tickFormat    (fn [y] (us-dollars y))
+                  :domain        #js [min-value max-value]})
+      (vline #js {:data points}))))
+
+(def yearly-value-chart (comp/factory YearlyValueChart))
+
+(defsc Root [this props]
+  {:initial-state {:label     "Yearly Value"
+                   :x-step    2
+                   :plot-data [{:year 1983 :value 100}
+                               {:year 1984 :value 100}
+                               {:year 1985 :value 90}
+                               {:year 1986 :value 89}
+                               {:year 1987 :value 88}
+                               {:year 1988 :value 85}
+                               {:year 1989 :value 83}
+                               {:year 1990 :value 80}
+                               {:year 1991 :value 70}
+                               {:year 1992 :value 80}
+                               {:year 1993 :value 90}
+                               {:year 1994 :value 95}
+                               {:year 1995 :value 110}
+                               {:year 1996 :value 120}
+                               {:year 1997 :value 160}
+                               {:year 1998 :value 170}
+                               {:year 1999 :value 180}
+                               {:year 2000 :value 180}
+                               {:year 2001 :value 200}]}}
+  (dom/div
+    (yearly-value-chart props)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 7. <a id="UnionstoSelectType"></a><a href="#UnionstoSelectType">Unions to Select Type</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('union-example-1')">Focus Inspector</button>
+<div class="short narrow example" id="union-example-1"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.union-example-1
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom :refer [div table td tr th tbody]]
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r :refer [defsc-router]]
+    [book.elements :as ele]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [taoensso.timbre :as log]))
+
+(defn person? [props] (contains? props :person/id))
+(defn place? [props] (contains? props :place/id))
+(defn thing? [props] (contains? props :thing/id))
+
+(defn item-ident
+  "Generate an ident from a person, place, or thing."
+  [props]
+  (cond
+    (person? props) [:person/id (:person/id props)]
+    (place? props) [:place/id (:place/id props)]
+    (thing? props) [:thing/id (:thing/id props)]
+    :else (log/error "Cannot generate a valid ident. Invalid props." props)))
+
+(defn item-key
+  "Generate a distinct react key for a person, place, or thing"
+  [props] (str (item-ident props)))
+
+(defn make-person [id n] {:person/id id :person/name n})
+(defn make-place [id n] {:place/id id :place/name n})
+(defn make-thing [id n] {:thing/id id :thing/label n})
+
+(defsc PersonDetail [this {:person/keys [id name] :as props}]
+  ; defsc-router expects there to be an initial state for each possible target. We'll cause this to be a "no selection"
+  ; state so that the detail screen that starts out will show "Nothing selected". We initialize all three in case
+  ; we later re-order them in the defsc-router.
+  {:ident         (fn [] (item-ident props))
+   :query         [:person/id :person/name]
+   :initial-state {:person/id :no-selection}}
+  (dom/div
+    (if (= id :no-selection)
+      "Nothing selected"
+      (str "Details about person " name))))
+
+(defsc PlaceDetail [this {:place/keys [id name] :as props}]
+  {:ident         (fn [] (item-ident props))
+   :query         [:place/id :place/name]
+   :initial-state {:place/id :no-selection}}
+  (dom/div
+    (if (= id :no-selection)
+      "Nothing selected"
+      (str "Details about place " name))))
+
+(defsc ThingDetail [this {:thing/keys [id label] :as props}]
+  {:ident         (fn [] (item-ident props))
+   :query         [:thing/id :thing/label]
+   :initial-state {:thing/id :no-selection}}
+  (dom/div
+    (if (= id :no-selection)
+      "Nothing selected"
+      (str "Details about thing " label))))
+
+(defsc PersonListItem [this
+                       {:person/keys [id name] :as props}
+                       {:keys [onSelect] :as computed}]
+  {:ident (fn [] (item-ident props))
+   :query [:person/id :person/name]}
+  (dom/li {:onClick #(onSelect (item-ident props))}
+    (dom/a {} (str "Person " id " " name))))
+
+(def ui-person (comp/factory PersonListItem {:keyfn item-key}))
+
+(defsc PlaceListItem [this {:place/keys [id name] :as props} {:keys [onSelect] :as computed}]
+  {:ident (fn [] (item-ident props))
+   :query [:place/id :place/name]}
+  (dom/li {:onClick #(onSelect (item-ident props))}
+    (dom/a {} (str "Place " id " : " name))))
+
+(def ui-place (comp/factory PlaceListItem {:keyfn item-key}))
+
+(defsc ThingListItem [this {:thing/keys [id label] :as props} {:keys [onSelect] :as computed}]
+  {:ident (fn [] (item-ident props))
+   :query [:thing/id :thing/label]}
+  (dom/li {:onClick #(onSelect (item-ident props))}
+    (dom/a {} (str "Thing " id " : " label))))
+
+(def ui-thing (comp/factory ThingListItem item-key))
+
+(defsc-router ItemDetail [this props]
+  {:router-id      :detail-router
+   :ident          (fn [] (item-ident props))
+   :default-route  PersonDetail
+   :router-targets {:person/id PersonDetail
+                    :place/id  PlaceDetail
+                    :thing/id  ThingDetail}}
+  (dom/div "No route"))
+
+(def ui-item-detail (comp/factory ItemDetail))
+
+(defsc ItemUnion [this props]
+  {:ident (fn [] (item-ident props))
+   :query (fn [] {:person/id (comp/get-query PersonListItem)
+                  :place/id  (comp/get-query PlaceListItem)
+                  :thing/id  (comp/get-query ThingListItem)})}
+  (cond
+    (person? props) (ui-person props)
+    (place? props) (ui-place props)
+    (thing? props) (ui-thing props)
+    :else (dom/div "Invalid ident used in app state.")))
+
+(def ui-item-union (comp/factory ItemUnion {:keyfn item-key}))
+
+(defsc ItemList [this {:keys [items]} {:keys [onSelect]}]
+  {
+   :initial-state (fn [p]
+                    ; These would normally be loaded...but for demo purposes we just hand code a few
+                    {:items [(make-person 1 "Tony")
+                             (make-thing 2 "Toaster")
+                             (make-place 3 "New York")
+                             (make-person 4 "Sally")
+                             (make-thing 5 "Pillow")
+                             (make-place 6 "Canada")]})
+   :ident         (fn [] [:lists/id :singleton])
+   :query         [{:items (comp/get-query ItemUnion)}]}
+  (dom/ul :.ui.list
+    (map (fn [i] (ui-item-union (comp/computed i {:onSelect onSelect}))) items)))
+
+(def ui-item-list (comp/factory ItemList))
+
+(defsc Root [this {:keys [item-list item-detail]}]
+  {:query         [{:item-list (comp/get-query ItemList)}
+                   {:item-detail (comp/get-query ItemDetail)}]
+   :initial-state (fn [p] (merge
+                            (r/routing-tree
+                              (r/make-route :detail [(r/router-instruction :detail-router [:param/kind :param/id])]))
+                            {:item-list   (comp/get-initial-state ItemList nil)
+                             :item-detail (comp/get-initial-state ItemDetail nil)}))}
+  (let [; This is the only thing to do: Route the to the detail screen with the given route params!
+        showDetail (fn [[kind id]]
+                     (comp/transact! this `[(r/route-to {:handler :detail :route-params {:kind ~kind :id ~id}})]))]
+    ; devcards, embed in iframe so we can use bootstrap css easily
+    (div {:key "example-frame-key"}
+      (dom/style ".boxed {border: 1px solid black}")
+      (table :.ui.table {}
+        (tbody
+          (tr
+            (th "Items")
+            (th "Detail"))
+          (tr
+            (td (ui-item-list (comp/computed item-list {:onSelect showDetail})))
+            (td (ui-item-detail item-detail))))))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 8. <a id="UIBlocking"></a><a href="#UIBlocking">UI Blocking</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('ui-blocking-example')">Focus Inspector</button>
+<div class="short narrow example" id="ui-blocking-example"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.server.ui-blocking-example
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.wsscode.pathom.connect :as pc]))
+
+;; SERVER
+
+(pc/defmutation submit-form-mutation [env params]
+  {::pc/sym `submit-form}
+  (if (&gt; 0.5 (rand))
+    {:message "Everything went swell!"
+     :result  0}
+    {:message "There was an error!"
+     :result  1}))
+
+;; CLIENT
+
+(defsc BlockingOverlay [this {:keys [ui/active? ui/message]}]
+  {:query         [:ui/active? :ui/message]
+   :initial-state {:ui/active? false :ui/message "Please wait..."}}
+  (dom/div (clj-&gt;js {:style {:position        :absolute
+                             :display         (if active? "block" "none")
+                             :zIndex          65000
+                             :width           "400px"
+                             :height          "100px"
+                             :backgroundColor "rgba(0,0,0,0.5)"}})
+    (dom/div (clj-&gt;js {:style {:position  :relative
+                               :top       "40px"
+                               :color     "white"
+                               :textAlign "center"}}) message)))
+
+(def ui-overlay (comp/factory BlockingOverlay))
+
+(defn set-overlay-visible* [state tf] (assoc-in state [:overlay :ui/active?] tf))
+(defn set-overlay-message* [state message] (assoc-in state [:overlay :ui/message] message))
+
+(defsc MutationStatus [this props]
+  {:ident (fn [] [:remote-mutation :status])
+   :query [:message :result]})
+
+(defmutation submit-form [params]
+  (action [{:keys [state]}] (swap! state set-overlay-visible* true))
+  (remote [env]
+    (m/returning env MutationStatus)))
+
+(defn submit-ok? [env] (= 0 (some-&gt; env :state deref :remote-mutation :status :result)))
+
+(defmutation retry-or-hide-overlay [params]
+  (action [{:keys [reconciler state] :as env}]
+    (if (submit-ok? env)
+      (swap! state (fn [s]
+                     (-&gt; s
+                       (set-overlay-message* "Please wait...") ; reset the overlay message for the next appearance
+                       (set-overlay-visible* false))))
+      (do
+        (swap! state set-overlay-message* (str (-&gt; state deref :remote-mutation :status :message) " (Retrying...)"))
+        (comp/ptransact! reconciler `[(submit-form {}) (retry-or-hide-overlay {})]))))
+  (refresh [env] [:overlay]))                               ; we need this because the mutation runs outside of the context of a component
+
+(defsc Root [this {:keys [ui/name overlay]}]
+  {:query         [:ui/name {:overlay (comp/get-query BlockingOverlay)}]
+   :initial-state {:overlay {} :ui/name "Alicia"}}
+  (dom/div {:style {:width "400px" :height "100px"}}
+    (ui-overlay overlay)
+    (dom/p "Name: " (dom/input {:value name}))
+    (dom/button {:onClick #(comp/ptransact! this `[(submit-form {}) (retry-or-hide-overlay {})])}
+      "Submit")))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 9. <a id="DynamicQuery"></a><a href="#DynamicQuery">Dynamic Query</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('dynamic-queries')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-queries"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.dynamic-queries
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [goog.object]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :as m]))
+
+(declare ui-leaf)
+
+; This component allows you to toggle the query between [:x] and [:y]
+(defsc Leaf [this {:keys [x y]}]
+  {:initial-state (fn [params] {:x 1 :y 42})
+   :query         (fn [] [:x])                              ; avoid error checking so we can destructure both :x and :y in props
+   :ident         (fn [] [:LEAF :ID])}                      ; there is only one leaf in app state
+  (dom/div
+    (dom/button {:onClick (fn [] (comp/set-query! this ui-leaf {:query [:x]}))} "Set query to :x")
+    (dom/button {:onClick (fn [] (comp/set-query! this ui-leaf {:query [:y]}))} "Set query to :y")
+    ; If the query is [:x] then x will be defined, otherwise it will not.
+    (dom/button {:onClick (fn [e] (if x
+                                    (m/set-value! this :x (inc x))
+                                    (m/set-value! this :y (inc y))))}
+      (str "Count: " (or x y)))                             ; only one will be defined at a time
+    " Leaf"))
+
+(def ui-leaf (comp/factory Leaf {:qualifier :x}))
+
+(defsc Root [this {:keys [root/leaf] :as props}]
+  {:initial-state (fn [p] {:root/leaf (comp/get-initial-state Leaf {})})
+   :query         (fn [] [{:root/leaf (comp/get-query ui-leaf)}])}
+  (dom/div (ui-leaf leaf)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 10. <a id="DynamicQueryParameters"></a><a href="#DynamicQueryParameters">Dynamic Query Parameters</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('dynamic-query-parameters')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-query-parameters"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.dynamic-query-parameters
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [goog.object]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]))
+
+; This component has a query parameter that can be set to whatever we want dynamically
+(defsc Leaf [this {:keys [x y] :as props}]
+  {:initial-state (fn [params] {:x 1 :y 99})
+   :query         (fn [] '[:x ?additional-stuff])           ; the parameter ?additional-stuff starts out empty
+   :ident         (fn [] [:LEAF :ID])}
+  (dom/div
+    (dom/button  {:onClick (fn [] (comp/set-query! this Leaf {:params {:additional-stuff :y}}))} "Add :y to query")
+    (dom/button  {:onClick (fn [] (comp/set-query! this Leaf {:params {}}))} "Drop :y from query")
+    (dom/ul
+      (dom/li  "x: " x)
+      (dom/li  "y: " y))))
+
+(def ui-leaf (comp/factory Leaf))
+
+(defsc Root [this {:keys [root/leaf] :as props}]
+  {:initial-state (fn [p] {:root/leaf (comp/get-initial-state Leaf {})})
+   :query         (fn [] [{:root/leaf (comp/get-query ui-leaf)}])}
+  (dom/div  (ui-leaf leaf)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 11. <a id="RoutingDemo"></a><a href="#RoutingDemo">Routing Demo</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('ui-routing')">Focus Inspector</button>
+<div class="short narrow example" id="ui-routing"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.ui-routing
+  (:require
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r :refer-macros [defsc-router]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :as m]))
+
+(defsc Main [this {:keys [label] :as props}]
+  {:initial-state {:page :main :label "MAIN"}
+   :ident         (fn [] [(:page props) :top])
+   :query         [:page :label]}
+  (dom/div {:style {:backgroundColor "red"}}
+    label))
+
+(defsc Login [this {:keys [label] :as props}]
+  {:initial-state {:page :login :label "LOGIN"}
+   :ident         (fn [] [(:page props) :top])
+   :query         [:page :label]}
+  (dom/div {:style {:backgroundColor "green"}}
+    label))
+
+(defsc NewUser [this {:keys [label] :as props}]
+  {:initial-state {:page :new-user :label "New User"}
+   :ident         (fn [] [(:page props) :top])
+   :query         [:page :label]}
+  (dom/div {:style {:backgroundColor "skyblue"}}
+    label))
+
+(defsc StatusReport [this {:keys [id page]}]
+  {:initial-state {:id :a :page :status-report}
+   :ident         (fn [] [page id])
+   :query         [:id :page :label]}
+  (dom/div {:style {:backgroundColor "yellow"}}
+    (dom/div (str "Status " id))))
+
+(defsc GraphingReport [this {:keys [id page]}]
+  {:initial-state {:id :a :page :graphing-report}
+   :ident         (fn [] [page id])
+   :query         [:id :page :label]}                       ; make sure you query for everything need by the router's ident function!
+  (dom/div {:style {:backgroundColor "orange"}}
+    (dom/div (str "Graph " id))))
+
+(defsc-router ReportRouter [this props]
+  {:router-id      :report-router
+   :ident          (fn [] [(:page props) (:id props)])
+   :default-route  StatusReport
+   :router-targets {:status-report   StatusReport
+                    :graphing-report GraphingReport}})
+
+(def ui-report-router (comp/factory ReportRouter))
+
+; BIG GOTCHA: Make sure you query for the prop (in this case :page) that the union needs in order to decide. It won't pull it itself!
+(defsc ReportsMain [this {:keys [page report-router]}]
+  ; nest the router under any arbitrary key, just be consistent in your query and props extraction.
+  {:initial-state (fn [params] {:page :report :report-router (comp/get-initial-state ReportRouter {})})
+   :ident         (fn [] [page :top])
+   :query         [:page {:report-router (comp/get-query ReportRouter)}]}
+  (dom/div {:style {:backgroundColor "grey"}}
+    ; Screen-specific content to be shown "around" or "above" the subscreen
+    "REPORT MAIN SCREEN"
+    ; Render the sub-router. You can also def a factory for the router (e.g. ui-report-router)
+    (ui-report-router report-router)))
+
+(defsc-router TopRouter [this props]
+  {:router-id      :top-router
+   :default-route  Main
+   :ident          (fn [] [(:page props) :top])
+   :router-targets {:main     Main
+                    :login    Login
+                    :new-user NewUser
+                    :report   ReportsMain}})
+
+(def ui-top (comp/factory TopRouter))
+
+(def routing-tree
+  "A map of route handling instructions. The top key is the handler name of the route which can be
+  thought of as the terminal leaf in the UI graph of the screen that should be \"foremost\".
+
+  The value is a vector of routing-instructions to tell the UI routers which ident
+  of the route that should be made visible.
+
+  A value in this ident using the `param` namespace will be replaced with the incoming route parameter
+  (without the namespace). E.g. the incoming route-param :report-id will replace :param/report-id"
+  (r/routing-tree
+    (r/make-route :main [(r/router-instruction :top-router [:main :top])])
+    (r/make-route :login [(r/router-instruction :top-router [:login :top])])
+    (r/make-route :new-user [(r/router-instruction :top-router [:new-user :top])])
+    (r/make-route :graph [(r/router-instruction :top-router [:report :top])
+                          (r/router-instruction :report-router [:graphing-report :param/report-id])])
+    (r/make-route :status [(r/router-instruction :top-router [:report :top])
+                           (r/router-instruction :report-router [:status-report :param/report-id])])))
+
+(defsc Root [this {:keys [top-router]}]
+  ; r/routing-tree-key implies the alias of com.fulcrologic.fulcro.routing.legacy-ui-routers as r.
+  {:initial-state (fn [params] (merge routing-tree
+                                 {:top-router (comp/get-initial-state TopRouter {})}))
+   :query         [r/routing-tree-key
+                   {:top-router (comp/get-query TopRouter)}]}
+  (dom/div
+    ; Sample nav mutations
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :main})])} "Main") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :new-user})])} "New User") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :login})])} "Login") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :status :route-params {:report-id :a}})])} "Status A") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :graph :route-params {:report-id :a}})])} "Graph A")
+    (ui-top top-router)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 12. <a id="SimpleRouter"></a><a href="#SimpleRouter">Simple Router</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('simple-router-1')">Focus Inspector</button>
+<div class="short narrow example" id="simple-router-1"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.simple-router-1
+  (:require
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r :refer-macros [defsc-router]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :as m]))
+
+(defsc Index [this {:keys [db/id router/page]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])                         ; IMPORTANT! Look up both things, don't use the shorthand for idents on screens!
+   :initial-state {:db/id 1 :router/page :PAGE/index}}
+  (dom/div nil "Index Page"))
+
+(defsc Settings [this {:keys [db/id router/page]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])
+   :initial-state {:db/id 1 :router/page :PAGE/settings}}
+  (dom/div "Settings Page"))
+
+(defsc-router RootRouter [this {:keys [router/page db/id]}]
+  {:router-id      :root/router
+   :default-route  Index
+   :ident          (fn [] [page id])
+   :router-targets {:PAGE/index    Index
+                    :PAGE/settings Settings}}
+  (dom/div "Bad route"))
+
+(def ui-root-router (comp/factory RootRouter))
+
+(defsc Root [this {:keys [router]}]
+  {:initial-state (fn [p] {:router (comp/get-initial-state RootRouter {})})
+   :query         [{:router (comp/get-query RootRouter)}]}
+  (dom/div
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :root/router
+                                        :target [:PAGE/index 1]})])} "Index") " | "
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :root/router
+                                        :target [:PAGE/settings 1]})])} "Settings")
+    (ui-root-router router)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 13. <a id="NestedRouter"></a><a href="#NestedRouter">Nested Router</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('simple-router-2')">Focus Inspector</button>
+<div class="short narrow example" id="simple-router-2"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.simple-router-2
+  (:require
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r :refer-macros [defsc-router]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :as m]))
+
+(defsc Index [this {:keys [router/page db/id]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])
+   :initial-state {:db/id 1 :router/page :PAGE/index}}
+  (dom/div "Index Page"))
+
+(defsc EmailSettings [this {:keys [db/id router/page]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])
+   :initial-state {:db/id 1 :router/page :PAGE/email}}
+  (dom/div "Email Settings Page"))
+
+(defsc ColorSettings [this {:keys [db/id router/page]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])
+   :initial-state {:db/id 1 :router/page :PAGE/color}}
+  (dom/div "Color Settings"))
+
+(defsc-router SettingsRouter [this {:keys [router/page db/id]}]
+  {:router-id      :settings/router
+   :ident          (fn [] [page id])
+   :router-targets {:PAGE/email EmailSettings
+                    :PAGE/color ColorSettings}
+   :default-route  EmailSettings}
+  (dom/div "Bad route"))
+
+(def ui-settings-router (comp/factory SettingsRouter))
+
+(defsc Settings [this {:keys [router/page db/id subpage]}]
+  {:query         [:db/id :router/page {:subpage (comp/get-query SettingsRouter)}]
+   :ident         (fn [] [page id])
+   :initial-state (fn [p]
+                    {:db/id       1
+                     :router/page :PAGE/settings
+                     :subpage     (comp/get-initial-state SettingsRouter {})})}
+  (dom/div
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :settings/router
+                                        :target [:PAGE/email 1]})])} "Email") " | "
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :settings/router
+                                        :target [:PAGE/color 1]})])} "Colors")
+    (js/console.log :p (comp/props this))
+    (ui-settings-router subpage)))
+
+(defsc-router RootRouter [this {:keys [router/page db/id]}]
+  {:router-id      :root/router
+   :ident          (fn [] [page id])
+   :default-route  Index
+   :router-targets {:PAGE/index    Index
+                    :PAGE/settings Settings}}
+  (dom/div "Bad route"))
+
+(def ui-root-router (comp/factory RootRouter))
+
+(defsc Root [this {:keys [router]}]
+  {:initial-state (fn [p] {:router (comp/get-initial-state RootRouter {})})
+   :query         [{:router (comp/get-query RootRouter)}]}
+  (dom/div
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :root/router
+                                        :target [:PAGE/index 1]})])} "Index") " | "
+    (dom/a {:onClick #(comp/transact! this
+                        `[(r/set-route {:router :root/router
+                                        :target [:PAGE/settings 1]})])} "Settings")
+    (ui-root-router router)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 14. <a id="TreetoDBwithQueries"></a><a href="#TreetoDBwithQueries">Tree to DB with Queries</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('tree-to-db')">Focus Inspector</button>
+<div class="short narrow example" id="tree-to-db"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.tree-to-db
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [devcards.util.edn-renderer :refer [html-edn]]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.algorithms.normalize :as fnorm]))
+
+(defsc SubQuery [t p]
+  {:ident [:sub/by-id :id]
+   :query [:id :data]})
+
+(defsc TopQuery [t p]
+  {:ident [:top/by-id :id]
+   :query [:id {:subs (comp/get-query SubQuery)}]})
+
+(defmutation normalize-from-to-result [ignored-params]
+  (action [{:keys [state]}]
+    (let [result (fnorm/tree-&gt;db TopQuery (:from @state) true)]
+      (swap! state assoc :result result))))
+
+(defmutation reset [ignored-params] (action [{:keys [state]}] (swap! state dissoc :result)))
+
+(defsc Root [this {:keys [from result]}]
+  {:query         [:from :result]
+   :initial-state (fn [params]
+                    ; some data we're just shoving into the database from root...***not normalized***
+                    {:from {:id :top-1 :subs [{:id :sub-1 :data 1} {:id :sub-2 :data 2}]}})}
+  (dom/div
+    (dom/div
+      (dom/h4 "Pretend Incoming Tree")
+      (html-edn from))
+    (dom/div
+      (dom/h4 "Normalized Result (click below to normalize)")
+      (when result
+        (html-edn result)))
+    (dom/button {:onClick (fn [] (comp/transact! this `[(normalize-from-to-result {})]))} "Normalized (Run tree-&gt;db)")
+    (dom/button {:onClick (fn [] (comp/transact! this `[(reset {})]))} "Clear Result")))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 15. <a id="MergingwithaComponent"></a><a href="#MergingwithaComponent">Merging with a Component</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('merge-component')">Focus Inspector</button>
+<div class="short narrow example" id="merge-component"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.merge-component
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]))
+
+(defsc Counter [this {:keys [counter/id counter/n] :as props} {:keys [onClick] :as computed}]
+  {:query [:counter/id :counter/n]
+   :ident [:counter/by-id :counter/id]}
+  (dom/div :.counter
+    (dom/span :.counter-label
+      (str "Current count for counter " id ":  "))
+    (dom/span :.counter-value n)
+    (dom/button {:onClick #(onClick id)} "Increment")))
+
+(def ui-counter (comp/factory Counter {:keyfn :counter/id}))
+
+; the * suffix is just a notation to indicate an implementation of something..in this case the guts of a mutation
+(defn increment-counter*
+  "Increment a counter with ID counter-id in a Fulcro database."
+  [database counter-id]
+  (update-in database [:counter/by-id counter-id :counter/n] inc))
+
+(defmutation increment-counter [{:keys [id] :as params}]
+  ; The local thing to do
+  (action [{:keys [state] :as env}]
+    (swap! state increment-counter* id))
+  ; The remote thing to do. True means "the same (abstract) thing". False (or omitting it) means "nothing"
+  (remote [env] true))
+
+(defsc CounterPanel [this {:keys [counters]}]
+  {:initial-state (fn [params] {:counters []})
+   :query         [{:counters (comp/get-query Counter)}]
+   :ident         (fn [] [:panels/by-kw :counter])}
+  (let [click-callback (fn [id] (comp/transact! this
+                                  `[(increment-counter {:id ~id}) :counter/by-id]))]
+    (dom/div
+      ; embedded style: kind of silly in a real app, but doable
+      (dom/style ".counter { width: 400px; padding-bottom: 20px; }
+                  button { margin-left: 10px; }")
+      ; computed lets us pass calculated data to our component's 3rd argument. It has to be
+      ; combined into a single argument or the factory would not be React-compatible (not would it be able to handle
+      ; children).
+      (map #(ui-counter (comp/computed % {:onClick click-callback})) counters))))
+
+(def ui-counter-panel (comp/factory CounterPanel))
+
+(defonce timer-id (atom 0))
+(declare sample-of-counter-app-with-merge-component-fulcro-app)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The code of interest...
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn add-counter
+  "NOTE: A function callable from anywhere as long as you have a reconciler..."
+  [app counter]
+  (merge/merge-component! app Counter counter
+    :append [:panels/by-kw :counter :counters]))
+
+(defsc Root [this {:keys [panel]}]
+  {:query         [{:panel (comp/get-query CounterPanel)}]
+   :initial-state {:panel {}}}
+  (dom/div {:style {:border "1px solid black"}}
+    ; NOTE: A plain function...pretend this is happening outside of the UI...we're doing it here so we can embed it in the book...
+    (dom/button {:onClick #(add-counter (comp/any-&gt;app this) {:counter/id 4 :counter/n 22})} "Simulate Data Import")
+    (dom/hr)
+    "Counters:"
+    (ui-counter-panel panel)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 16. <a id="HTMLConverter"></a><a href="#HTMLConverter">HTML Converter</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('html-converter')">Focus Inspector</button>
+<div class="short narrow example" id="html-converter"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.html-converter
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [hickory.core :as hc]
+    [clojure.set :as set]
+    [clojure.pprint :refer [pprint]]
+    [clojure.string :as str]))
+
+(def attr-renames {
+                   :class        :className
+                   :for          :htmlFor
+                   :tabindex     :tabIndex
+                   :viewbox      :viewBox
+                   :spellcheck   :spellcheck
+                   :autocorrect  :autoCorrect
+                   :autocomplete :autoComplete})
+
+(defn elem-to-cljs [elem]
+  (cond
+    (and (string? elem)
+      (let [elem (str/trim elem)]
+        (or
+          (= "" elem)
+          (and
+            (str/starts-with? elem "&lt;!--")
+            (str/ends-with? elem "--&gt;"))
+          (re-matches #"^[ \n]*$" elem)))) nil
+    (string? elem) (str/trim elem)
+    (vector? elem) (let [tag      (name (first elem))
+                         attrs    (set/rename-keys (second elem) attr-renames)
+                         children (keep elem-to-cljs (drop 2 elem))]
+                     (concat (list (symbol "dom" tag) attrs) children))
+    :otherwise "UNKNOWN"))
+
+(defn to-cljs
+  "Convert an HTML fragment (containing just one tag) into a corresponding Dom cljs"
+  [html-fragment]
+  (let [hiccup-list (map hc/as-hiccup (hc/parse-fragment html-fragment))]
+    (first (map elem-to-cljs hiccup-list))))
+
+(defmutation convert [p]
+  (action [{:keys [state]}]
+    (let [html (get-in @state [:top :conv :html])
+          cljs (to-cljs html)]
+      (swap! state assoc-in [:top :conv :cljs] {:code cljs}))))
+
+(defsc HTMLConverter [this {:keys [html cljs]}]
+  {:initial-state (fn [params] {:html "&lt;div id=\"3\" class=\"b\"&gt;&lt;p&gt;Paragraph&lt;/p&gt;&lt;/div&gt;" :cljs {:code (list)}})
+   :query         [:cljs :html]
+   :ident         (fn [] [:top :conv])}
+  (dom/div {:className ""}
+    (dom/textarea {:cols     80 :rows 10
+                   :onChange (fn [evt] (m/set-string! this :html :event evt))
+                   :value    html})
+    (dom/pre {} (with-out-str (pprint (:code cljs))))
+    (dom/button :.c-button {:onClick (fn [evt]
+                                       (comp/transact! this `[(convert {})]))} "Convert")))
+
+(def ui-html-convert (comp/factory HTMLConverter))
+
+(defsc Root [this {:keys [converter]}]
+  {:initial-state {:converter {}}
+   :query         [{:converter (comp/get-query HTMLConverter)}]}
+  (ui-html-convert converter))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 17. <a id="EditingExistingData"></a><a href="#EditingExistingData">Editing Existing Data</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('form-state-demo-1')">Focus Inspector</button>
+<div class="short narrow example" id="form-state-demo-1"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.forms.form-state-demo-1
+  (:require
+    [com.fulcrologic.semantic-ui.modules.dropdown.ui-dropdown :as dropdown]
+    [book.elements :as ele]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [cljs.spec.alpha :as s]
+    [taoensso.timbre :as log]))
+
+(declare Root PhoneForm)
+
+(defn field-attrs
+  "A helper function for getting aspects of a particular field."
+  [component field]
+  (let [form         (comp/props component)
+        entity-ident (comp/get-ident component form)
+        id           (str (first entity-ident) "-" (second entity-ident))
+        is-dirty?    (fs/dirty? form field)
+        clean?       (not is-dirty?)
+        validity     (fs/get-spec-validity form field)
+        is-invalid?  (= :invalid validity)
+        value        (get form field "")]
+    {:dirty?   is-dirty?
+     :ident    entity-ident
+     :id       id
+     :clean?   clean?
+     :validity validity
+     :invalid? is-invalid?
+     :value    value}))
+
+(s/def :phone/number #(re-matches #"\(?[0-9]{3}[-.)]? *[0-9]{3}-?[0-9]{4}" %))
+
+(defmutation abort-phone-edit [{:keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state (fn [s]
+                   (-&gt; s
+                     ; stop editing
+                     (dissoc :root/phone)
+                     ; revert to the pristine state
+                     (fs/pristine-&gt;entity* [:phone/id id])))))
+  (refresh [env] [:root/phone]))
+
+(defmutation submit-phone [{:keys [id delta]}]
+  (action [{:keys [state]}]
+    (swap! state (fn [s]
+                   (-&gt; s
+                     ; stop editing
+                     (dissoc :root/phone)
+                     ; update the pristine state
+                     (fs/entity-&gt;pristine* [:phone/id id])))))
+  (remote [env] true)
+  (refresh [env] [:root/phone [:phone/id id]]))
+
+(defn input-with-label
+  [component field label validation-message input]
+  (let [{:keys [dirty? invalid?]} (field-attrs component field)]
+    (comp/fragment
+      (dom/div :.field {:classes [(when invalid? "error") (when dirty? "warning")]}
+        (dom/label {:htmlFor (str field)} label)
+        input)
+      (when invalid?
+        (dom/div :.ui.error.message {} validation-message))
+      (when dirty?
+        (dom/div :.ui.warning.message {} "(dirty)")))))
+
+(defsc PhoneForm [this {:phone/keys [id type number] :as props}]
+  {:query       [:phone/id :phone/type :phone/number fs/form-config-join]
+   :form-fields #{:phone/number :phone/type}
+   :ident       :phone/id}
+  (let [dirty?   (fs/dirty? props)
+        invalid? (= :invalid (fs/get-spec-validity props))]
+    (dom/div :.ui.form {:classes [(when invalid? "error") (when dirty? "warning")]}
+      (input-with-label this :phone/number "Phone:" "10-digit phone number is required."
+        (dom/input {:value    (or (str number) "")
+                    :onChange #(m/set-string! this :phone/number :event %)}))
+      (input-with-label this :phone/type "Type:" ""
+        (dropdown/ui-dropdown {:value     (name type)
+                               :selection true
+                               :options   [{:text "Home" :value "home"}
+                                           {:text "Work" :value "work"}]
+                               :onChange  (fn [_ v]
+                                            (when-let [v (some-&gt; (.-value v) keyword)]
+                                              (m/set-value! this :phone/type v)))}))
+      (dom/button :.ui.button {:onClick #(comp/transact! this [(abort-phone-edit {:id id})])} "Cancel")
+      (dom/button :.ui.button {:disabled (or (not (fs/checked? props)) (fs/invalid-spec? props))
+                               :onClick  #(comp/transact! this [(submit-phone {:id id :delta (fs/dirty-fields props true)})])} "Commit!"))))
+
+(def ui-phone-form (comp/factory PhoneForm {:keyfn :phone/id}))
+
+(defsc PhoneNumber [this {:phone/keys [id type number]} {:keys [onSelect]}]
+  {:query         [:phone/id :phone/number :phone/type]
+   :initial-state {:phone/id :param/id :phone/number :param/number :phone/type :param/type}
+   :ident         :phone/id}
+  (dom/li :.ui.item
+    (dom/a {:onClick (fn [] (onSelect id))}
+      (str number " (" (get {:home "Home" :work "Work" nil "Unknown"} type) ")"))))
+
+(def ui-phone-number (comp/factory PhoneNumber {:keyfn :phone/id}))
+
+(defsc PhoneBook [this {:phonebook/keys [id phone-numbers]} {:keys [onSelect]}]
+  {:query         [:phonebook/id {:phonebook/phone-numbers (comp/get-query PhoneNumber)}]
+   :initial-state {:phonebook/id            :main
+                   :phonebook/phone-numbers [{:id 1 :number "541-555-1212" :type :home}
+                                             {:id 2 :number "541-555-5533" :type :work}]}
+   :ident         :phonebook/id}
+  (dom/div
+    (dom/h4 "Phone Book (click a number to edit)")
+    (dom/ul
+      (map (fn [n] (ui-phone-number (comp/computed n {:onSelect onSelect}))) phone-numbers))))
+
+(def ui-phone-book (comp/factory PhoneBook {:keyfn :phonebook/id}))
+
+(defmutation edit-phone-number [{:keys [id]}]
+  (action [{:keys [state]}]
+    (let [phone-type (get-in @state [:phone/id id :phone/type])]
+      (swap! state (fn [s]
+                     (-&gt; s
+                       ; make sure the form config is with the entity
+                       (fs/add-form-config* PhoneForm [:phone/id id])
+                       ; since we're editing an existing thing, we should start it out complete (validations apply)
+                       (fs/mark-complete* [:phone/id id])
+                       ; tell the root UI that we're editing a phone number by linking it in
+                       (assoc :root/phone [:phone/id id])))))))
+
+(defsc Root [this {:keys [:root/phone :root/phonebook]}]
+  {:query         [{:root/phonebook (comp/get-query PhoneBook)}
+                   {:root/phone (comp/get-query PhoneForm)}]
+   :initial-state {:root/phonebook {}
+                   :root/phone     {}}}
+  (ele/ui-iframe {:frameBorder 0 :width 500 :height 400}
+    (dom/div
+      (dom/link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"})
+      (if (contains? phone :phone/number)
+        (ui-phone-form phone)
+        (ui-phone-book (comp/computed phonebook {:onSelect (fn [id] (comp/transact! this [(edit-phone-number {:id id})]))}))))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 18. <a id="NetworkInteractionsandForms"></a><a href="#NetworkInteractionsandForms">Network Interactions and Forms</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('form-state-demo-2')">Focus Inspector</button>
+<div class="short narrow example" id="form-state-demo-2"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.forms.form-state-demo-2
+  (:require
+    [com.fulcrologic.semantic-ui.modules.dropdown.ui-dropdown :as dropdown]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [clojure.string :as str]
+    [cljs.spec.alpha :as s]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.wsscode.pathom.connect :as pc]
+    [book.elements :as ele]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Server Code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; a simple query for any person, that will return valid-looking data
+(pc/defresolver person-resolver [env {:person/keys [id]}]
+  {::pc/input  #{:person/id}
+   ::pc/output [:person/name :person/age :person/phone-numbers]}
+  {:person/id            id
+   :person/name          (str "User " id)
+   :person/age           56
+   :person/phone-numbers [{:phone/id 1 :phone/number "555-111-1212" :phone/type :work}
+                          {:phone/id 2 :phone/number "555-333-4444" :phone/type :home}]})
+
+(defonce id (atom 1000))
+(defn next-id [] (swap! id inc))
+
+; Server submission...just prints delta for demo, and remaps tempids (forms with tempids are always considered dirty)
+(pc/defmutation submit-person-mutation [env inputs]
+  {::pc/sym `submit-person}
+  (let [params (-&gt; env :ast :params)]
+    (js/console.log "Server received form submission with content: ")
+    (cljs.pprint/pprint params)
+    (let [ids    (map (fn [[k v]] (second k)) (:diff params))
+          remaps (into {} (keep (fn [v] (when (tempid/tempid? v) [v (next-id)])) ids))]
+      {:tempids remaps})))
+
+(def resolvers [person-resolver submit-person-mutation])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Client Code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(s/def :person/name (s/and string? #(seq (str/trim %))))
+(s/def :person/age #(s/int-in-range? 1 120 %))
+
+(defn field-attrs
+  "A helper function for getting aspects of a particular field."
+  [component field]
+  (let [form         (comp/props component)
+        entity-ident (comp/get-ident component form)
+        id           (str (first entity-ident) "-" (second entity-ident))
+        is-dirty?    (fs/dirty? form field)
+        clean?       (not is-dirty?)
+        validity     (fs/get-spec-validity form field)
+        is-invalid?  (= :invalid validity)
+        value        (get form field "")]
+    {:dirty?   is-dirty?
+     :ident    entity-ident
+     :id       id
+     :clean?   clean?
+     :validity validity
+     :invalid? is-invalid?
+     :value    value}))
+
+(def integer-fields #{:person/age})
+
+(defn input-with-label
+  [component field label validation-message input]
+  (let [{:keys [dirty? invalid?]} (field-attrs component field)]
+    (comp/fragment
+      (dom/div :.field {:classes [(when invalid? "error") (when dirty? "warning")]}
+        (dom/label {:htmlFor (str field)} label)
+        input)
+      (when invalid?
+        (dom/div :.ui.error.message {} validation-message))
+      (when dirty?
+        (dom/div :.ui.warning.message {} "(dirty)")))))
+
+(s/def :phone/number #(re-matches #"\(?[0-9]{3}[-.)]? *[0-9]{3}-?[0-9]{4}" %))
+
+(defsc PhoneForm [this {:phone/keys [id number type] :as props}]
+  {:query       [:phone/id :phone/number :phone/type fs/form-config-join]
+   :form-fields #{:phone/number :phone/type}
+   :ident       :phone/id}
+  (dom/div :.ui.segment
+    (dom/div :.ui.form
+      (input-with-label this :phone/number "Phone:" "10-digit phone number is required."
+        (dom/input {:value    (or (str number) "")
+                    :onBlur   #(comp/transact! this [(fs/mark-complete! {:entity-ident [:phone/id id]
+                                                                         :field        :phone/number})])
+                    :onChange #(m/set-string! this :phone/number :event %)}))
+      (input-with-label this :phone/type "Type:" ""
+        (dropdown/ui-dropdown {:value     (name type)
+                               :selection true
+                               :options   [{:text "Home" :value "home"}
+                                           {:text "Work" :value "work"}]
+                               :onChange  (fn [_ v]
+                                            (when-let [v (some-&gt; (.-value v) keyword)]
+                                              (m/set-value! this :phone/type v)
+                                              (comp/transact! this [(fs/mark-complete! {:field :phone/type})])))})))))
+
+(def ui-phone-form (comp/factory PhoneForm {:keyfn :phone/id}))
+
+(defn add-phone*
+  "Add the given phone info to a person."
+  [state-map phone-id person-id type number]
+  (let [phone-ident      [:phone/id phone-id]
+        new-phone-entity {:phone/id phone-id :phone/type type :phone/number number}]
+    (-&gt; state-map
+      (update-in [:person/id person-id :person/phone-numbers] (fnil conj []) phone-ident)
+      (assoc-in phone-ident new-phone-entity))))
+
+(defmutation add-phone
+  "Mutation: Add a phone number to a person, and initialize it as a working form."
+  [{:keys [person-id]}]
+  (action [{:keys [state]}]
+    (let [phone-id (tempid/tempid)]
+      (swap! state (fn [s]
+                     (-&gt; s
+                       (add-phone* phone-id person-id :home "")
+                       (fs/add-form-config* PhoneForm [:phone/id phone-id])))))))
+
+(defsc PersonForm [this {:person/keys [id name age phone-numbers]}]
+  {:query       [:person/id :person/name :person/age
+                 {:person/phone-numbers (comp/get-query PhoneForm)}
+                 fs/form-config-join]
+   :form-fields #{:person/name :person/age :person/phone-numbers} ; phone-numbers here becomes a subform because it is a join in the query.
+   :ident       :person/id}
+  (dom/div :.ui.form
+    (input-with-label this :person/name "Name:" "Name is required."
+      (dom/input {:value (or name "")}))
+    (input-with-label this :person/age "Age:" "Age must be between 1 and 120"
+      (dom/input {:value (or age "")}))
+    (dom/h4 "Phone numbers:")
+    (when (seq phone-numbers)
+      (map ui-phone-form phone-numbers))
+    (dom/button :.ui.button {:onClick #(comp/transact! this `[(add-phone {:person-id ~id})])} "+")))
+
+(def ui-person-form (comp/factory PersonForm {:keyfn :person/id}))
+
+(defn add-person*
+  "Add a person with the given details to the state database."
+  [state-map id name age]
+  (let [person-ident [:person/id id]
+        person       {:db/id id :person/name name :person/age age}]
+    (assoc-in state-map person-ident person)))
+
+(defmutation edit-new-person [_]
+  (action [{:keys [state]}]
+    (let [person-id    (tempid/tempid)
+          person-ident [:person/id person-id]
+          phone-id     (tempid/tempid)]
+      (swap! state
+        (fn [s] (-&gt; s
+                  (add-person* person-id "" 0)
+                  (add-phone* phone-id person-id :home "")
+                  (assoc :root/person person-ident)         ; join it into the UI as the person to edit
+                  (fs/add-form-config* PersonForm [:person/id person-id])))))))
+
+(defmutation edit-existing-person
+  "Turn an existing person with phone numbers into an editable form with phone subforms."
+  [{:keys [person-id]}]
+  (action [{:keys [state]}]
+    (swap! state
+      (fn [s] (-&gt; s
+                (assoc :root/person [:person/id person-id])
+                (fs/add-form-config* PersonForm [:person/id person-id]) ; will not re-add config to entities that were present
+                (fs/entity-&gt;pristine* [:person/id person-id]) ; in case we're re-loading it, make sure the pristine copy it up-to-date
+                ;; it just came from server, so all fields should be valid
+                (fs/mark-complete* [:person/id person-id]))))))
+
+(defmutation submit-person [{:keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state fs/entity-&gt;pristine* [:person/id id]))
+  (remote [env] true))
+
+(defsc Root [this {:keys [root/person]}]
+  {:query         [{:root/person (comp/get-query PersonForm)}]
+   :initial-state (fn [params] {})}
+  (ele/ui-iframe {:frameBorder 0 :width 800 :height 820}
+    (dom/div :.ui.container.segments
+      (dom/link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"})
+      (dom/button :.ui.button
+        {:onClick #(df/load! this [:person/id 21] PersonForm {:target               [:root/person]
+                                                              :marker               false
+                                                              :post-mutation        `edit-existing-person
+                                                              :post-mutation-params {:person-id 21}})}
+        "Simulate Edit (existing) Person from Server")
+      (dom/button :.ui.buton {:onClick #(comp/transact! this `[(edit-new-person {})])} "Simulate New Person Creation")
+
+      (when (:person/name person)
+        (dom/div :.ui.segment
+          (ui-person-form person)))
+
+      (dom/div :.ui.segment
+        (dom/button :.ui.button {:onClick  #(comp/transact! this `[(fs/reset-form! {:form-ident [:person/id ~(:db/id person)]})])
+                                 :disabled (not (fs/dirty? person))} "Reset")
+        (dom/button :.ui.button {:onClick  #(comp/transact! this `[(submit-person {:id ~(:db/id person) :diff ~(fs/dirty-fields person false)})])
+                                 :disabled (or
+                                             (fs/invalid-spec? person)
+                                             (not (fs/dirty? person)))} "Submit")))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 19. <a id="Autocomplete"></a><a href="#Autocomplete">Autocomplete</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('autocomplete-demo')">Focus Inspector</button>
+<div class="short narrow example" id="autocomplete-demo"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.autocomplete
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.airports :refer [airports]]
+    [clojure.string :as str]
+    [goog.functions :as gf]
+    [com.wsscode.pathom.connect :as pc]
+    ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn airport-search [s]
+  (-&gt;&gt; airports
+    (filter (fn [i] (str/includes? (str/lower-case i) (str/lower-case s))))
+    (take 10)
+    vec))
+
+(pc/defresolver list-resolver [env params]
+  {::pc/output [:autocomplete/airports]}
+  (let [search (get-in env [:ast :params :search])]
+    {:autocomplete/airports (airport-search search)}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn autocomplete-ident
+  "Returns the ident for an autocomplete control. Can be passed a map of props, or a raw ID."
+  [id-or-props]
+  (if (map? id-or-props)
+    [:autocomplete/by-id (:db/id id-or-props)]
+    [:autocomplete/by-id id-or-props]))
+
+(defsc CompletionList [this {:keys [values onValueSelect]}]
+  (dom/ul nil
+    (map (fn [v]
+           (dom/li {:key v}
+             (dom/a {:href "javascript:void(0)" :onClick #(onValueSelect v)} v))) values)))
+
+(def ui-completion-list (comp/factory CompletionList))
+
+(m/defmutation populate-loaded-suggestions
+  "Mutation: Autocomplete suggestions are loaded in a non-visible property to prevent flicker. This is
+  used as a post mutation to move them to the active UI field so they appear."
+  [{:keys [id]}]
+  (action [{:keys [state]}]
+    (let [autocomplete-path (autocomplete-ident id)
+          source-path       (conj autocomplete-path :autocomplete/loaded-suggestions)
+          target-path       (conj autocomplete-path :autocomplete/suggestions)]
+      (swap! state assoc-in target-path (get-in @state source-path)))))
+
+(def get-suggestions
+  "A debounced function that will trigger a load of the server suggestions into a temporary locations and fire
+   a post mutation when that is complete to move them into the main UI view."
+  (letfn [(load-suggestions [comp new-value id]
+            (df/load! comp :autocomplete/airports nil
+              {:params               {:search new-value}
+               :marker               false
+               :post-mutation        `populate-loaded-suggestions
+               :post-mutation-params {:id id}
+               :target               (conj (autocomplete-ident id) :autocomplete/loaded-suggestions)}))]
+    (gf/debounce load-suggestions 500)))
+
+(defsc Autocomplete [this {:keys [db/id autocomplete/suggestions autocomplete/value] :as props}]
+  {:query         [:db/id                                   ; the component's ID
+                   :autocomplete/loaded-suggestions         ; A place to do the loading, so we can prevent flicker in the UI
+                   :autocomplete/suggestions                ; the current completion suggestions
+                   :autocomplete/value]                     ; the current user-entered value
+   :ident         (fn [] (autocomplete-ident props))
+   :initial-state (fn [{:keys [id]}] {:db/id id :autocomplete/suggestions [] :autocomplete/value ""})}
+  (let [field-id             (str "autocomplete-" id)       ; for html label/input association
+        ;; server gives us a few, and as the user types we need to filter it further.
+        filtered-suggestions (when (vector? suggestions)
+                               (filter #(str/includes? (str/lower-case %) (str/lower-case value)) suggestions))
+        ; We want to not show the list if they've chosen something valid
+        exact-match?         (and (= 1 (count filtered-suggestions)) (= value (first filtered-suggestions)))
+        ; When they select an item, we place it's value in the input
+        onSelect             (fn [v] (m/set-string! this :autocomplete/value :value v))]
+    (dom/div {:style {:height "600px"}}
+      (dom/label {:htmlFor field-id} "Airport: ")
+      (dom/input {:id       field-id
+                  :value    value
+                  :onChange (fn [evt]
+                              (let [new-value (.. evt -target -value)]
+                                ; we avoid even looking for help until they've typed a couple of letters
+                                (if (&gt;= (.-length new-value) 2)
+                                  (get-suggestions this new-value id)
+                                  ; if they shrink the value too much, clear suggestions
+                                  (m/set-value! this :autocomplete/suggestions []))
+                                ; always update the input itself (controlled)
+                                (m/set-string! this :autocomplete/value :value new-value)))})
+      ; show the completion list when it exists and isn't just exactly what they've chosen
+      (when (and (vector? suggestions) (seq suggestions) (not exact-match?))
+        (ui-completion-list {:values filtered-suggestions :onValueSelect onSelect})))))
+
+(def ui-autocomplete (comp/factory Autocomplete))
+
+(defsc AutocompleteRoot [this {:keys [airport-input]}]
+  {:initial-state (fn [p] {:airport-input (comp/get-initial-state Autocomplete {:id :airports})})
+   :query         [{:airport-input (comp/get-query Autocomplete)}]}
+  (dom/div
+    (dom/h4 "Airport Autocomplete")
+    (ui-autocomplete airport-input)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 20. <a id="CascadingDropdowns"></a><a href="#CascadingDropdowns">Cascading Dropdowns</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('cascading-dropdowns')">Focus Inspector</button>
+<div class="short narrow example" id="cascading-dropdowns"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.cascading-dropdowns
+  (:require
+    [com.fulcrologic.semantic-ui.modules.dropdown.ui-dropdown :as dropdown]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [book.elements :as ele]
+    [taoensso.timbre :as log]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Server
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn option [value text]
+  {:text text :value value})
+
+(pc/defresolver model-resolver [env _]
+  {::pc/output [:models]}
+  (let [make (-&gt; env :ast :params :make)]
+    {:models (case make
+               :ford [(option :escort "Escort") (option :F-150 "F-150")]
+               :honda [(option :civic "Civic") (option :accort "Accord")])}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Client
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn render-example
+  "Wrap an example in an iframe so we can load external CSS without affecting the containing page."
+  [width height &amp; children]
+  (ele/ui-iframe {:frameBorder 0 :height height :width width}
+    (apply dom/div {:key "example-frame-key"}
+      (dom/style ".boxed {border: 1px solid black}")
+      (dom/link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"})
+      children)))
+
+(comment
+
+  (defmutation show-list-loading
+    "Change the items of the dropdown with the given ID to a single item that indicates Loading..."
+    [{:keys [id]}]
+    (action [{:keys [state]}]
+      (swap! state assoc-in
+        [:bootstrap.dropdown/by-id id :fulcro.ui.bootstrap3/items]
+        [(assoc (bs/dropdown-item :loading "Loading...") :fulcro.ui.bootstrap3/disabled? true)])))
+
+  (defsc Root [this {:keys [make-dropdown model-dropdown]}]
+    {:initial-state {}
+     :query         [; initial state for two Bootstrap dropdowns
+                     {:make-dropdown (comp/get-query bs/Dropdown)}
+                     {:model-dropdown (comp/get-query bs/Dropdown)}]}
+    (let [{:keys [:fulcro.ui.bootstrap3/items]} model-dropdown]
+      (render-example "200px" "200px"
+        (dom/div
+          (dropdown/ui-dropdown
+            {:onSelect  (fn [item]
+                          ; Update the state of the model dropdown to show a loading indicator
+                          (comp/transact! this `[(show-list-loading {:id :model})])
+                          ; Issue the remote load. Note the use of DropdownItem as the query, so we get proper normalization
+                          ; The targeting is used to make sure we hit the correct dropdown's items
+                          (df/load this :models bs/DropdownItem {:target [:bootstrap.dropdown/by-id :model :fulcro.ui.bootstrap3/items]
+                                                                 ; don't overwrite state with loading markers...we're doing that manually to structure it specially
+                                                                 :marker false
+                                                                 ; A server parameter on the query
+                                                                 :params {:make item}}))
+             :stateful? true})
+          (dropdown/ui-dropdown model-dropdown
+            {:onSelect  (fn [item] (log/info item))
+             :stateful? true}))))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 21. <a id="DynamicUIRouting"></a><a href="#DynamicUIRouting">Dynamic UI Routing</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('dynamic-ui-routing')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-ui-routing"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.dynamic-ui-routing
+  (:require
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [cljs.loader :as loader]
+    [taoensso.timbre :as log]))
+
+(defsc Login [this {:keys [label login-prop]}]
+  {:initial-state (fn [params] {r/dynamic-route-key :login :label "LOGIN" :login-prop "login data"})
+   :ident         (fn [] [:login :singleton])
+   :query         [r/dynamic-route-key :label :login-prop]}
+  (dom/div {:style {:backgroundColor "green"}}
+    (str label " " login-prop)))
+
+(defsc NewUser [this {:keys [label new-user-prop]}]
+  {:initial-state (fn [params] {r/dynamic-route-key :new-user :label "New User" :new-user-prop "new user data"})
+   :ident         (fn [] [:new-user :singleton])
+   :query         [r/dynamic-route-key :label :new-user-prop]}
+  (dom/div {:style {:backgroundColor "skyblue"}}
+    (str label " " new-user-prop)))
+
+(defsc Root [this {:keys [top-router :com.fulcrologic.fulcro.routing.legacy-ui-routers/pending-route]}]
+  {:initial-state (fn [params] (merge
+                                 (r/routing-tree
+                                   (r/make-route :ui-main [(r/router-instruction :top-router [:ui-main :singleton])])
+                                   (r/make-route :login [(r/router-instruction :top-router [:login :singleton])])
+                                   (r/make-route :new-user [(r/router-instruction :top-router [:new-user :singleton])]))
+                                 {:top-router (comp/get-initial-state r/DynamicRouter {:id :top-router})}))
+   :query         [:ui/react-key {:top-router (r/get-dynamic-router-query :top-router)}
+                   :com.fulcrologic.fulcro.routing.legacy-ui-routers/pending-route
+                   r/routing-tree-key]}
+  (dom/div nil
+    ; Sample nav mutations
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :ui-main})])} "Main") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :new-user})])} "New User") " | "
+    (dom/a {:onClick #(comp/transact! this `[(r/route-to {:handler :login})])} "Login") " | "
+    (dom/div (if pending-route "Loading" "Done"))
+    (r/ui-dynamic-router top-router)))
+
+; Use this as started-callback. These would happen as a result of module loads:
+(defn application-loaded [app]
+  ; Let the dynamic router know that two of the routes are already loaded.
+  (comp/transact! app `[(r/install-route {:target-kw :new-user :component ~NewUser})
+                        (r/install-route {:target-kw :login :component ~Login})
+                        (r/route-to {:handler :login})]))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 22. <a id="RecursiveDemo1"></a><a href="#RecursiveDemo1">Recursive Demo 1</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('recursive-demo-1')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-1"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.recursive-demo-1
+  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.dom :as dom]))
+
+(defn make-person
+  "Make a person data map with optional children."
+  [id name children]
+  (cond-&gt; {:db/id id :person/name name}
+    children (assoc :person/children children)))
+
+(declare ui-person)
+
+; The ... in the query means there will be children of the same type, of arbitrary depth
+; it is equivalent to (comp/get-query Person), but calling get query on yourself would
+; lead to infinite compiler recursion.
+(defsc Person [this {:keys [:person/name :person/children]}]
+  {:query         (fn [] [:db/id :person/name {:person/children '...}])
+   :initial-state (fn [p]
+                    (make-person 1 "Joe"
+                      [(make-person 2 "Suzy" [])
+                       (make-person 3 "Billy" [])
+                       (make-person 4 "Rae"
+                         [(make-person 5 "Ian"
+                            [(make-person 6 "Zoe" [])])])]))
+   :ident         [:person/id :db/id]}
+  (dom/div
+    (dom/h4 name)
+    (when (seq children)
+      (dom/div
+        (dom/ul
+          (map (fn [p]
+                 (ui-person p))
+            children))))))
+
+(def ui-person (comp/factory Person {:keyfn :db/id}))
+
+(defsc Root [this {:keys [person-of-interest]}]
+  {:initial-state {:person-of-interest {}}
+   :query         [{:person-of-interest (comp/get-query Person)}]}
+  (dom/div
+    (ui-person person-of-interest)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 23. <a id="RecursiveDemo2"></a><a href="#RecursiveDemo2">Recursive Demo 2</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('recursive-demo-2')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-2"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.recursive-demo-2
+  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+            [com.fulcrologic.fulcro.dom :as dom]))
+
+(declare ui-person)
+
+(defmutation make-older [{:keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:person/id id :person/age] inc)))
+
+(defsc Person [this {:keys [db/id person/name person/spouse person/age]}]
+  {:query         (fn [] [:db/id :person/name :person/age {:person/spouse 1}]) ; force limit the depth
+   :initial-state (fn [p]
+                    ; this does look screwy...you can nest the same map in the recursive position,
+                    ; and it'll just merge into the one that was previously normalized during normalization.
+                    ; You need to do this or you won't get the loop in the database.
+                    {:db/id         1
+                     :person/name   "Joe"
+                     :person/age    20
+                     :person/spouse {:db/id         2
+                                     :person/name   "Sally"
+                                     :person/age    22
+                                     :person/spouse {:db/id 1 :person/name "Joe"}}})
+   :ident         [:person/id :db/id]}
+  (dom/div
+    (dom/div "Name:" name)
+    (dom/div "Age:" age
+      (dom/button {:onClick
+                   #(comp/transact! this `[(make-older {:id ~id})])} "Make Older"))
+    (when spouse
+      (dom/ul
+        (dom/div "Spouse:" (ui-person spouse))))))
+
+(def ui-person (comp/factory Person {:keyfn :db/id}))
+
+(defsc Root [this {:keys [person-of-interest]}]
+  {:initial-state {:person-of-interest {}}
+   :query         [{:person-of-interest (comp/get-query Person)}]}
+  (dom/div
+    (ui-person person-of-interest)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 24. <a id="RecursiveDemo3"></a><a href="#RecursiveDemo3">Recursive Demo 3</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('recursive-demo-3')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-3"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.recursive-demo-3
+  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+            [com.fulcrologic.fulcro.dom :as dom]))
+
+(declare ui-person)
+
+(defmutation make-older [{:keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:person/id id :person/age] inc)))
+
+; We use computed to track the depth. Targeted refreshes will retain the computed they got on
+; the most recent render. This allows us to detect how deep we are.
+(defsc Person [this
+               {:keys [db/id person/name person/spouse person/age]} ; props
+               {:keys [render-depth] :or {render-depth 0}}] ; computed
+  {:query         (fn [] [:db/id :person/name :person/age {:person/spouse 1}]) ; force limit the depth
+   :initial-state (fn [p]
+                    {:db/id         1 :person/name "Joe" :person/age 20
+                     :person/spouse {:db/id         2 :person/name "Sally"
+                                     :person/age    22
+                                     :person/spouse {:db/id 1 :person/name "Joe"}}})
+   :ident         [:person/id :db/id]}
+  (dom/div
+    (dom/div "Name:" name)
+    (dom/div "Age:" age
+      (dom/button {:onClick
+                   #(comp/transact! this `[(make-older {:id ~id})])} "Make Older"))
+    (when (and (= 0 render-depth) spouse)
+      (dom/ul
+        (dom/div "Spouse:"
+          ; recursively render, but increase the render depth so we can know when a
+          ; targeted UI refresh would accidentally push the UI deeper.
+          (ui-person (comp/computed spouse {:render-depth (inc render-depth)})))))))
+
+(def ui-person (comp/factory Person {:keyfn :db/id}))
+
+(defsc Root [this {:keys [person-of-interest]}]
+  {:initial-state {:person-of-interest {}}
+   :query         [{:person-of-interest (comp/get-query Person)}]}
+  (dom/div
+    (ui-person person-of-interest)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 25. <a id="RecursiveDemo4"></a><a href="#RecursiveDemo4">Recursive Demo 4</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('recursive-demo-bullets')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-bullets"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.queries.recursive-demo-bullets
+  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+            [com.fulcrologic.fulcro.dom :as dom]
+            [clojure.string :as str]))
+
+(declare ui-item)
+
+(defsc Item [this {:keys [ui/checked? item/label item/subitems]}]
+  {:query (fn [] [:ui/checked? :db/id :item/label {:item/subitems '...}])
+   :ident [:item/by-id :db/id]}
+  (dom/li
+    (dom/input {:type     "checkbox"
+                :checked  (if (boolean? checked?) checked? false)
+                :onChange #(m/toggle! this :ui/checked?)})
+    label
+    (when subitems
+      (dom/ul
+        (map ui-item subitems)))))
+
+(def ui-item (comp/factory Item {:keyfn :db/id}))
+
+(defsc ItemList [this {:keys [db/id list/items] :as props}]
+  {:query [:db/id {:list/items (comp/get-query Item)}]
+   :ident [:list/by-id :db/id]}
+  (dom/ul
+    (map ui-item items)))
+
+(def ui-item-list (comp/factory ItemList {:keyfn :db/id}))
+
+(defsc Root [this {:keys [list]}]
+  {:initial-state (fn [p]
+                    {:list {:db/id      1
+                            :list/items [{:db/id 2 :item/label "A"
+                                          :item/subitems
+                                                 [{:db/id      7
+                                                   :item/label "A.1"
+                                                   :item/subitems
+                                                               [{:db/id         8
+                                                                 :item/label    "A.1.1"
+                                                                 :item/subitems []}]}]}
+                                         {:db/id      3
+                                          :item/label "B"
+                                          :item/subitems
+                                                      [{:db/id 6 :item/label "B.1"}]}
+                                         {:db/id         4
+                                          :item/label    "C"
+                                          :item/subitems []}
+                                         {:db/id         5
+                                          :item/label    "D"
+                                          ; just for fun..nest a dupe under D
+                                          :item/subitems [{:db/id 6 :item/label "B.1"}]}]}})
+   :query         [{:list (comp/get-query ItemList)}]}
+  (dom/div
+    (ui-item-list list)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 26. <a id="LoadingDataBasics"></a><a href="#LoadingDataBasics">Loading Data Basics</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('loading-data-basics')">Focus Inspector</button>
+<div class="short narrow example" id="loading-data-basics"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.loading-data-basics
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-users {1 {:ldb.person/id 1 :ldb.person/name "A" :ldb.person/kind :friend}
+                2 {:ldb.person/id 2 :ldb.person/name "B" :ldb.person/kind :friend}
+                3 {:ldb.person/id 3 :ldb.person/name "C" :ldb.person/kind :enemy}
+                4 {:ldb.person/id 4 :ldb.person/name "D" :ldb.person/kind :friend}})
+
+(pc/defresolver sample-person-resolver [env {:person/keys [id]}]
+  {::pc/input  #{:ldb.person/id}
+   ::pc/output [:ldb.person/age-ms :ldb.person/name :ldb.person/kind]}
+  (when-let [person (get all-users id)]
+    (assoc person :ldb.person/age-ms (now))))
+
+(pc/defresolver people-of-some-kind-resolver [env input]
+  {::pc/output [{:ldb/people [:ldb.person/id]}]}
+  (let [{:keys [kind]} (-&gt; env :ast :params)]
+    (let [result (into []
+                   (comp
+                     (filter (fn [p] (= kind (:ldb.person/kind p))))
+                     (map (fn [p] (select-keys p [:ldb.person/id]))))
+                   (vals all-users))]
+      {:ldb/people result})))
+
+(def resolvers [sample-person-resolver people-of-some-kind-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsc Person [this {:ldb.person/keys [id name age-ms] :as props}]
+  {:query [:ldb.person/id :ldb.person/name :ldb.person/age-ms]
+   :ident :ldb.person/id}
+  (dom/li
+    (str name " (last queried at " age-ms ")")
+    (dom/button {:onClick (fn []
+                            ; Load relative to an ident (of this component).
+                            ; This will refresh the entity in the db. The helper function
+                            ; (df/refresh! this) is identical to this, but shorter to write.
+                            (df/load! this (comp/ident this props) Person))} "Update")))
+
+(def ui-person (comp/factory Person {:keyfn :db/id}))
+
+(defsc People [this {:list/keys [people]}]
+  {:initial-state (fn [{:keys [kind]}] {:list/id kind :list/people []})
+   :query         [:list/id {:list/people (comp/get-query Person)}]
+   :ident         :list/id}
+  (dom/ul
+    (map ui-person people)))
+
+(def ui-people (comp/factory People {:keyfn :people/kind}))
+
+(defsc Root [this {:root/keys [friends enemies]}]
+  {:initial-state (fn [{:keys [kind]}] {:root/friends (comp/get-initial-state People {:id :friends})
+                                        :root/enemies (comp/get-initial-state People {:id :enemies})})
+   :query         [{:root/enemies (comp/get-query People)} {:root/friends (comp/get-query People)}]}
+  (dom/div
+    (dom/h4 "Friends")
+    (ui-people friends)
+    (dom/h4 "Enemies")
+    (ui-people enemies)))
+
+(defn initialize
+  "To be used in :started-callback to pre-load things."
+  [app]
+  ; This is a sample of loading a list of people into a given target, including
+  ; use of params. The generated network query will result in params
+  ; appearing in the server-side query, and :people will be the dispatch
+  ; key. The subquery will also be available (from Person). See the server code above.
+  (df/load! app :ldb/people Person {:target [:list/id :enemies :list/people]
+                                    :params {:kind :enemy}})
+  (df/load! app :ldb/people Person {:target [:list/id :friends :list/people]
+                                    :params {:kind :friend}}))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 27. <a id="LoadingDataandTargetingEntities"></a><a href="#LoadingDataandTargetingEntities">Loading Data and Targeting Entities</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('loading-data-targeting-entities')">Focus Inspector</button>
+<div class="short narrow example" id="loading-data-targeting-entities"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.loading-data-targeting-entities
+  (:require
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp]
+    [com.wsscode.pathom.connect :as pc]))
+
+;; SERVER
+
+(pc/defresolver random-person-resolver [env {:keys [id]}]
+  {::pc/input [:person/id]
+   ::pc/output [:person/name]}
+  {:person/id id :person/name (str "Person " id)})
+
+;; CLIENT
+
+(defsc Person [this {:keys [person/name]}]
+  {:query [:db/id :person/name]
+   :ident [::person-by-id :db/id]}
+  (dom/div (str "Hi, I'm " name)))
+
+(def ui-person (comp/factory Person {:keyfn :db/id}))
+
+(defsc Pane [this {:keys [db/id pane/person] :as props}]
+  {:query         [:db/id {:pane/person (comp/get-query Person)}]
+   :initial-state (fn [{:keys [id]}] {:db/id id :pane/person nil})
+   :ident         [:pane/by-id :db/id]}
+
+  (dom/div
+    (dom/h4 (str "Pane " id))
+    (if person
+      (ui-person person)
+      (dom/div "No person loaded..."))))
+
+(def ui-pane (comp/factory Pane {:keyfn :db/id}))
+
+(defsc Panel [this {:keys [panel/left-pane panel/right-pane]}]
+  {:query         [{:panel/left-pane (comp/get-query Pane)}
+                   {:panel/right-pane (comp/get-query Pane)}]
+   :initial-state (fn [params] {:panel/left-pane  (comp/get-initial-state Pane {:id :left})
+                                :panel/right-pane (comp/get-initial-state Pane {:id :right})})
+   :ident         (fn [] [:PANEL :only-one])}
+  (dom/div
+    (ui-pane left-pane)
+    (ui-pane right-pane)))
+
+(def ui-panel (comp/factory Panel {:keyfn :db/id}))
+
+(defn load-random-person [component where]
+  (let [load-target  (case where
+                       (:left :right) [:pane/by-id where :pane/person]
+                       :both (df/multiple-targets
+                               [:pane/by-id :left :pane/person]
+                               [:pane/by-id :right :pane/person]))
+
+        person-ident [::person-by-id (rand-int 100)]]
+    (df/load! component person-ident Person {:target load-target :marker false})))
+
+(defsc Root [this {:keys [root/panel] :as props}]
+  {:query         [{:root/panel (comp/get-query Panel)}]
+   :initial-state (fn [params] {:root/panel (comp/get-initial-state Panel {})})}
+  (dom/div
+    (ui-panel panel)
+    (dom/button {:onClick #(load-random-person this :left)} "Load into Left")
+    (dom/button {:onClick #(load-random-person this :right)} "Load into Right")
+    (dom/button {:onClick #(load-random-person this :both)} "Load into Both")))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 28. <a id="LoadingInResponseToUIRouting"></a><a href="#LoadingInResponseToUIRouting">Loading In Response To UI Routing</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('loading-in-response-to-UI-routing')">Focus Inspector</button>
+<div class="short narrow example" id="loading-in-response-to-UI-routing"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.loading-in-response-to-UI-routing
+  (:require
+    [com.fulcrologic.fulcro.routing.legacy-ui-routers :as r]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(pc/defresolver all-settings-resolver [env input]
+  {::pc/output [{:all-settings [:id :value]}]}
+  {:all-settings [{:id 1 :value "Gorgon"}
+                  {:id 2 :value "Thraser"}
+                  {:id 3 :value "Under"}]})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsc SomeSetting [this {:keys [id value]}]
+  {:query [:ui/fetch-state :id :value]
+   :ident [:setting/by-id :id]}
+  (dom/p nil "Setting " id " from server has value: " value))
+
+(def ui-setting (comp/factory SomeSetting {:keyfn :id}))
+
+(defsc SettingsTab [this {:keys [settings-content settings]}]
+  {:initial-state {:kind             :settings
+                   :settings-content "Settings Tab"
+                   :settings         []}
+   ; This query uses a "link"...a special ident with '_ as the ID. This indicates the item is at the database
+   ; root, not inside of the "settings" database object. This is not needed as a matter of course...it is only used
+   ; for convenience (since it is trivial to load something into the root of the database)
+   :query         [:kind :settings-content {:settings (comp/get-query SomeSetting)}]}
+  (dom/div nil
+    settings-content
+    (if (seq settings)
+      (map ui-setting settings)
+      (dom/div "No settings."))))
+
+(defsc MainTab [this {:keys [main-content]}]
+  {:initial-state {:kind :main :main-content "Main Tab"}
+   :query         [:kind :main-content]}
+  (dom/div nil main-content))
+
+(r/defsc-router UITabs [this props]
+  {:router-id      :ui-router
+   :ident          (fn [] [(:kind props) :tab])
+   :default-route  MainTab
+   :router-targets {:main     MainTab
+                    :settings SettingsTab}})
+
+(def ui-tabs (comp/factory UITabs))
+
+(m/defmutation choose-tab [{:keys [tab]}]
+  (action [{:keys [state]}] (swap! state r/set-route :ui-router [tab :tab])))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; LAZY LOADING TAB CONTENT
+;; This is the shape of what to do. We define a method that can examine the
+;; state to decide if we want to trigger a load. Then we define a mutation
+;; that the UI can call during transact (see the transact! call for Settings on Root in ui.cljs).
+;; The mutation itself (app/lazy-load-tab) below uses a data-fetch helper function to
+;; set :remote to the right thing, and can then give one or more load-data-action's to
+;; indicate what should actually be retrieved. The server implementation is trivial in
+;; this case. See api.clj.
+
+;; When to consider the data missing? Check the state and find out.
+(defn missing-tab? [state tab]
+  (let [settings (-&gt; @state :settings :tab :settings)]
+    (or (not (vector? settings))
+      (and (vector? settings) (empty? settings)))))
+
+(m/defmutation lazy-load-tab [{:keys [tab]}]
+  (action [{:keys [app state] :as env}]
+    ; Specify what you want to load as one or more calls to load-action (each call adds an item to load):
+    (when (missing-tab? state tab)
+      (df/load! app :all-settings SomeSetting
+        {:target  [:settings :tab :settings]
+         :refresh [:settings]}))))
+
+(defsc Root [this {:keys [current-tab] :as props}]
+  ; Construction MUST compose to root, just like the query. The resulting tree will automatically be normalized into the
+  ; app state graph database.
+  {:initial-state (fn [params] {:current-tab (comp/get-initial-state UITabs nil)})
+   :query         [{:current-tab (comp/get-query UITabs)}]}
+  (dom/div
+    ; The selection of tabs can be rendered in a child, but the transact! must be done from the parent (to
+    ; ensure proper re-render of the tab body). See comp/computed for passing callbacks.
+    (dom/button {:onClick #(comp/transact! this `[(choose-tab {:tab :main})])} "Main")
+    (dom/button {:onClick #(comp/transact! this `[(choose-tab {:tab :settings})
+                                                  ; extra mutation: sample of what you would do to lazy load the tab content
+                                                  (lazy-load-tab {:tab :settings})])} "Settings")
+    (ui-tabs current-tab)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 29. <a id="LoadingIndicators"></a><a href="#LoadingIndicators">Loading Indicators</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('loading-indicators')">Focus Inspector</button>
+<div class="short narrow example" id="loading-indicators"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.loading-indicators
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]] ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(declare Item)
+
+(defsc Item [this {:keys [db/id item/label] :as props}]
+  ; query for the entire load marker table. use the lambda form of query for link queries
+  {:query (fn [] [:db/id :item/label [df/marker-table '_]])
+   :ident (fn [] [:lazy-load.items/by-id id])}
+  (let [marker-id (keyword "item-marker" (str id))
+        marker    (get-in props [df/marker-table marker-id])]
+    (dom/div label
+      ; If an item is rendered, and the fetch state is present, you can use helper functions from df namespace
+      ; to provide augmented rendering.
+      (if (df/loading? marker)
+        (dom/span " (reloading...)")
+        ; the `refresh!` function is a helper that can send an ident-based join query for a component.
+        ; it is equivalent to `(load reconciler [:lazy-load.items/by-id id] Item)`, but finds the params
+        ; using the component itself.
+        (dom/button {:onClick #(df/refresh! this {:marker marker-id})} "Refresh")))))
+
+(def ui-item (comp/factory Item {:keyfn :db/id}))
+
+(defsc Child [this {:keys [child/label items] :as props}]
+  {:query [:child/label {:items (comp/get-query Item)}]
+   :ident (fn [] [:lazy-load/ui :child])}
+  (let [render-list (fn [items] (map ui-item items))]
+    (dom/div
+      (dom/p "Child Label: " label)
+      (if (seq items)
+        (map ui-item items)
+        (dom/button {:onClick #(df/load-field! this :items {:marker :child-marker})} "Load Items")))))
+
+(def ui-child (comp/factory Child {:keyfn :child/label}))
+
+(defsc Panel [this {:keys [ui/loading-data child] :as props}]
+  {:initial-state (fn [params] {:child nil})
+   :query         (fn [] [[:ui/loading-data '_] [df/marker-table '_] {:child (comp/get-query Child)}]) ; link querys require lambda
+   :ident         (fn [] [:lazy-load/ui :panel])}
+  (let [markers (get props df/marker-table)
+        marker  (get markers :child-marker)]
+    (dom/div
+      (dom/div {:style {:float "right" :display (if loading-data "block" "none")}} "GLOBAL LOADING")
+      (dom/div "This is the Panel")
+      (if marker
+        (dom/h4 "Loading child...")
+        (if child
+          (ui-child child)
+          (dom/button {:onClick #(df/load-field! this :child {:marker :child-marker})} "Load Child"))))))
+
+(def ui-panel (comp/factory Panel))
+
+; Note: Kinda hard to do idents/lazy loading right on root...so generally just have root render simple layout
+; and then render a child that has the rest.
+(defsc Root [this {:keys [panel] :as props}]
+  {:initial-state (fn [params] {:panel (comp/get-initial-state Panel nil)})
+   :query         [{:panel (comp/get-query Panel)}]}
+  (dom/div (ui-panel panel)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 30. <a id="InitialState"></a><a href="#InitialState">Initial State</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('initial-app-state')">Focus Inspector</button>
+<div class="short narrow example" id="initial-app-state"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.initial-app-state
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]))
+
+(defmethod m/mutate 'nav/settings [{:keys [state]} sym params]
+  {:action (fn [] (swap! state assoc :panes [:settings :singleton]))})
+
+(defmethod m/mutate 'nav/main [{:keys [state]} sym params]
+  {:action (fn [] (swap! state assoc :panes [:main :singleton]))})
+
+(defsc ItemLabel [this {:keys [value]}]
+  {:initial-state (fn [{:keys [value]}] {:value value})
+   :query         [:value]
+   :ident         (fn [] [:labels/by-value value])}
+  (dom/p value))
+
+(def ui-label (comp/factory ItemLabel {:keyfn :value}))
+
+;; Foo and Bar are elements of a mutli-type to-many union relation (each leaf can be a Foo or a Bar). We use params to
+;; allow initial state to put more than one in place and have them be unique.
+(defsc Foo [this {:keys [label]}]
+  {:query         [:type :id {:label (comp/get-query ItemLabel)}]
+   :initial-state (fn [{:keys [id label]}] {:id id :type :foo :label (comp/get-initial-state ItemLabel {:value label})})}
+  (dom/div
+    (dom/h2 "Foo")
+    (ui-label label)))
+
+(def ui-foo (comp/factory Foo {:keyfn :id}))
+
+(defsc Bar [this {:keys [label]}]
+  {:query         [:type :id {:label (comp/get-query ItemLabel)}]
+   :initial-state (fn [{:keys [id label]}] {:id id :type :bar :label (comp/get-initial-state ItemLabel {:value label})})}
+  (dom/div
+    (dom/h2 "Bar")
+    (ui-label label)))
+
+(def ui-bar (comp/factory Bar {:keyfn :id}))
+
+;; This is the to-many union component. It is the decision maker (it has no state or rendering of it's own)
+;; The initial state of this component is the to-many (vector) value of various children
+;; The render just determines which thing it is, and passes on the that renderer
+(defsc ListItem [this {:keys [id type] :as props}]
+  {:initial-state (fn [params] [(comp/get-initial-state Bar {:id 1 :label "A"}) (comp/get-initial-state Foo {:id 2 :label "B"}) (comp/get-initial-state Bar {:id 3 :label "C"})])
+   :query         (fn [] {:foo (comp/get-query Foo) :bar (comp/get-query Bar)}) ; use lambda for unions
+   :ident         (fn [] [type id])}                        ; lambda for unions
+  (case type
+    :foo (ui-foo props)
+    :bar (ui-bar props)
+    (dom/p "No Item renderer!")))
+
+(def ui-list-item (comp/factory ListItem {:keyfn :id}))
+
+;; Settings and Main are the target "Panes" of a to-one union (e.g. imagine tabs...we use buttons as the tab switching in
+;; this example). The initial state looks very much like any other component, as does the rendering.
+(defsc Settings [this {:keys [label]}]
+  {:initial-state (fn [params] {:type :settings :id :singleton :label (comp/get-initial-state ItemLabel {:value "Settings"})})
+   :query         [:type :id {:label (comp/get-query ItemLabel)}]}
+  (ui-label label))
+
+(def ui-settings (comp/factory Settings {:keyfn :type}))
+
+(defsc Main [this {:keys [label]}]
+  {:initial-state (fn [params] {:type :main :id :singleton :label (comp/get-initial-state ItemLabel {:value "Main"})})
+   :query         [:type :id {:label (comp/get-query ItemLabel)}]}
+  (ui-label label))
+
+(def ui-main (comp/factory Main {:keyfn :type}))
+
+;; This is a to-one union component. Again, it has no state of its own or rendering. The initial state is the single
+;; child that should appear. Fulcro (during startup) will detect this component, and then use the query to figure out
+;; what other children (the ones that have initial-state defined) should be placed into app state.
+(defsc PaneSwitcher [this {:keys [id type] :as props}]
+  {:initial-state (fn [params] (comp/get-initial-state Main nil))
+   :query         (fn [] {:settings (comp/get-query Settings) :main (comp/get-query Main)})
+   :ident         (fn [] [type id])}
+  (case type
+    :settings (ui-settings props)
+    :main (ui-main props)
+    (dom/p "NO PANE!")))
+
+(def ui-panes (comp/factory PaneSwitcher {:keyfn :type}))
+
+;; The root. Everything just composes to here (state and query)
+;; Note, in core (where we create the app) there is no need to say anything about initial state!
+(defsc Root [this {:keys [panes items]}]
+  {:initial-state (fn [params] {:panes (comp/get-initial-state PaneSwitcher nil)
+                                :items (comp/get-initial-state ListItem nil)})
+   :query         [{:items (comp/get-query ListItem)}
+                   {:panes (comp/get-query PaneSwitcher)}]}
+  (dom/div
+    (dom/button {:onClick (fn [evt] (comp/transact! this '[(nav/settings)]))} "Go to settings")
+    (dom/button {:onClick (fn [evt] (comp/transact! this '[(nav/main)]))} "Go to main")
+
+    (ui-panes panes)
+
+    (dom/h1 "Heterogenous list:")
+
+    (dom/ul
+      (mapv ui-list-item items))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 31. <a id="LegacyLoadIndicators"></a><a href="#LegacyLoadIndicators">Legacy Load Indicators</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('legacy-load-indicators')">Focus Inspector</button>
+<div class="short narrow example" id="legacy-load-indicators"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.legacy-load-indicators
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [fulcro.logging :as log]
+    [fulcro.server :refer [defquery-entity]]
+    [com.fulcrologic.fulcro.dom :as dom]))
+
+;; SERVER
+
+(defquery-entity :lazy-load/ui
+  (value [env id params]
+    (case id
+      :panel {:child {:db/id 5 :child/label "Child"}}
+      :child {:items [{:db/id 1 :item/label "A"} {:db/id 2 :item/label "B"}]}
+      nil)))
+
+(defquery-entity :lazy-load.items/by-id
+  (value [env id params]
+    (log/info "Item query for " id)
+    {:db/id id :item/label (str "Refreshed Label " (rand-int 100))}))
+
+;; CLIENT
+
+(declare Item)
+
+(defsc Item [this {:keys [db/id item/label ui/fetch-state] :as props}]
+  ;; The :ui/fetch-state is queried so the parent (Child in this case) lazy load renderer knows what state the load is in
+  {:query [:db/id :item/label :ui/fetch-state]
+   :ident [:lazy-load.items/by-id :db/id]}
+  (dom/div nil label
+    ; If an item is rendered, and the fetch state is present, you can use helper functions from df namespace
+    ; to provide augmented rendering.
+    (if (df/loading? fetch-state)
+      (dom/span nil " (reloading...)")
+      ; the `refresh!` function is a helper that can send an ident-based join query for a component.
+      ; it is equivalent to `(load reconciler [:lazy-load.items/by-id ID] Item)`, but finds the params
+      ; using the component itself.
+      (dom/button {:onClick #(df/refresh! this)} "Refresh"))))
+
+(def ui-item (comp/factory Item {:keyfn :db/id}))
+
+(defsc Child [this {:keys [child/label items] :as props}]
+  ;; The :ui/fetch-state is queried so the parent (Panel) lazy load renderer knows what state the load is in
+  {:query [:ui/fetch-state :child/label {:items (comp/get-query Item)}]
+   :ident (fn [] [:lazy-load/ui :child])}
+  (let [; NOTE: Demostration of two ways of showing an item is refreshing...
+        render-item (fn [idx i] (if (= idx 0)
+                                  (ui-item i)               ; use the childs method of showing refresh
+                                  (dom/span {:key (str "ll-" idx)} ; the span is so we have a react key in the list
+                                    (df/lazily-loaded ui-item i)))) ; replace child with a load marker
+        render-list (fn [items] (map-indexed render-item items))]
+    (dom/div nil
+      (dom/p "Child Label: " label)
+      ; Rendering for all of the states can be supplied to lazily-loaded as named parameters
+      (df/lazily-loaded render-list items
+        :not-present-render (fn [items] (dom/button {:onClick #(df/load-field this :items)} "Load Items"))))))
+
+(def ui-child (comp/factory Child {:keyfn :child/label}))
+
+(defsc Panel [this {:keys [ui/loading-data child] :as props}]
+  {:initial-state (fn [params] {:child nil})
+   :query         (fn [] [[:ui/loading-data '_] {:child (comp/get-query Child)}])
+   :ident         (fn [] [:lazy-load/ui :panel])}
+  (dom/div
+    (dom/div {:style {:float "right" :display (if loading-data "block" "none")}} "GLOBAL LOADING")
+    (dom/div "This is the Panel")
+    (df/lazily-loaded ui-child child
+      :not-present-render (fn [_] (dom/button {:onClick #(df/load-field this :child)} "Load Child")))))
+
+(def ui-panel (comp/factory Panel))
+
+; Note: Kinda hard to do idents/lazy loading right on root...so generally just have root render a div
+; and then render a child that has the rest.
+(defsc Root [this {:keys [panel] :as props}]
+  {:initial-state (fn [params] {:panel (comp/get-initial-state Panel nil)})
+   :query         [:ui/loading-data {:panel (comp/get-query Panel)}]}
+  (dom/div (ui-panel panel)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 32. <a id="PaginatingListsFromServer"></a><a href="#PaginatingListsFromServer">Paginating Lists From Server</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('paginating-large-lists-from-server')">Focus Inspector</button>
+<div class="short narrow example" id="paginating-large-lists-from-server"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.paginating-large-lists-from-server
+  (:require
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(pc/defresolver infinite-pages [env input]
+  {::pc/output [{:paginate/items [:item/id]}]}
+  (let [params (-&gt; env :ast :params)
+        {:keys [start end]} params]
+    {:paginate/items (mapv (fn [id] {:item/id id}) (range start end))}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn page-exists? [state-map page-number]
+  (let [page-items (get-in state-map [:page/by-number page-number :page/items])]
+    (boolean (seq page-items))))
+
+(defn init-page
+  "An idempotent init function that just ensures enough of a page exists to make the UI work.
+   Doesn't affect the items."
+  [state-map page-number]
+  (assoc-in state-map [:page/by-number page-number :page/number] page-number))
+
+(defn set-current-page
+  "Point the current list's current page to the correct page entity in the db (via ident)."
+  [state-map page-number]
+  (assoc-in state-map [:list/by-id 1 :list/current-page] [:page/by-number page-number]))
+
+(defn clear-item
+  "Removes the given item from the item table."
+  [state-map item-id] (update state-map :items/by-id dissoc item-id))
+
+(defn clear-page
+  "Clear the given page (and associated items) from the app database."
+  [state-map page-number]
+  (let [page        (get-in state-map [:page/by-number page-number])
+        item-idents (:page/items page)
+        item-ids    (map second item-idents)]
+    (as-&gt; state-map s
+      (update s :page/by-number dissoc page-number)
+      (reduce (fn [acc id] (update acc :items/by-id dissoc id)) s item-ids))))
+
+(defn gc-distant-pages
+  "Clears loaded items from pages 5 or more steps away from the given page number."
+  [state-map page-number]
+  (reduce (fn [s n]
+            (if (&lt; 4 (Math/abs (- page-number n)))
+              (clear-page s n)
+              s)) state-map (keys (:page/by-number state-map))))
+
+(declare ListItem)
+
+(defn load-if-missing [{:keys [app state] :as env} page-number]
+  (when-not (page-exists? @state page-number)
+    (let [start (inc (* 10 (dec page-number)))
+          end   (+ start 9)]
+      (df/load! app :paginate/items ListItem {:params {:start start :end end}
+                                              :marker :page
+                                              :target [:page/by-number page-number :page/items]}))))
+
+(m/defmutation goto-page [{:keys [page-number]}]
+  (action [{:keys [state] :as env}]
+    (load-if-missing env page-number)
+    (swap! state (fn [s]
+                   (-&gt; s
+                     (init-page page-number)
+                     (set-current-page page-number)
+                     (gc-distant-pages page-number))))))
+
+(defsc ListItem [this {:keys [item/id]}]
+  {:query [:item/id :ui/fetch-state]
+   :ident [:items/by-id :item/id]}
+  (dom/li (str "Item " id)))
+
+(def ui-list-item (comp/factory ListItem {:keyfn :item/id}))
+
+(defsc ListPage [this {:keys [page/number page/items] :as props}]
+  {:initial-state {:page/number 1 :page/items []}
+   :query         [:page/number {:page/items (comp/get-query ListItem)}
+                   [df/marker-table :page]]
+   :ident         [:page/by-number :page/number]}
+  (let [status (get props [df/marker-table :page])]
+    (dom/div
+      (dom/p "Page number " number)
+      (if (df/loading? status)
+        (dom/div "Loading...")
+        (dom/ul (mapv ui-list-item items))))))
+
+(def ui-list-page (comp/factory ListPage {:keyfn :page/number}))
+
+(defsc LargeList [this {:keys [list/current-page]}]
+  {:initial-state (fn [params] {:list/current-page (comp/get-initial-state ListPage {})})
+   :query         [{:list/current-page (comp/get-query ListPage)}]
+   :ident         (fn [] [:list/by-id 1])}
+  (let [{:keys [page/number]} current-page]
+    (dom/div
+      (dom/button {:disabled (= 1 number) :onClick #(comp/transact! this `[(goto-page {:page-number ~(dec number)})])} "Prior Page")
+      (dom/button {:onClick #(comp/transact! this `[(goto-page {:page-number ~(inc number)})])} "Next Page")
+      (ui-list-page current-page))))
+
+(def ui-list (comp/factory LargeList))
+
+(defsc Root [this {:keys [pagination/list]}]
+  {:initial-state (fn [params] {:pagination/list (comp/get-initial-state LargeList {})})
+   :query         [{:pagination/list (comp/get-query LargeList)}]}
+  (dom/div (ui-list list)))
+
+(defn initialize
+  "To be used as started-callback. Load the first page."
+  [{:keys [app]}]
+  (comp/transact! app `[(goto-page {:page-number 1})]))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 33. <a id="Parallelvs.SequentialLoading"></a><a href="#Parallelvs.SequentialLoading">Parallel vs. Sequential Loading</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('parallel-vs-sequential-loading')">Focus Inspector</button>
+<div class="short narrow example" id="parallel-vs-sequential-loading"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.parallel-vs-sequential-loading
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.wsscode.pathom.connect :as pc]
+    [taoensso.timbre :as log]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(pc/defresolver long-query-resolver [_ _]
+  {::pc/output [:background/long-query]}
+  {:background/long-query 42})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defsc Child [this {:keys [id name background/long-query] :as props}]
+  {:query (fn [] [:id :name :background/long-query [df/marker-table '_]])
+   :ident [:background.child/by-id :id]}
+  (let [status (get-in props [df/marker-table [:fetching id]])]
+    (dom/div {:style {:display "inline" :float "left" :width "200px"}}
+      (dom/button {:onClick #(df/load-field! this :background/long-query {:parallel true
+                                                                          :marker   [:fetching id]})} "Load stuff parallel")
+      (dom/button {:onClick #(df/load-field! this :background/long-query {:marker [:fetching id]})} "Load stuff sequential")
+      (dom/div
+        name
+        (if (df/loading? status)
+          (dom/span "Loading...")
+          (dom/span long-query))))))
+
+(def ui-child (comp/factory Child {:keyfn :id}))
+
+(defsc Root [this {:keys [children] :as props}]
+  ; cheating a little...raw props used for child, instead of embedding them there.
+  {:initial-state (fn [params] {:children [{:id 1 :name "A"} {:id 2 :name "B"} {:id 3 :name "C"}]})
+   :query         [{:children (comp/get-query Child)}]}
+  (dom/div
+    (mapv ui-child children)
+    (dom/br {:style {:clear "both"}}) (dom/br)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 34. <a id="Parent-ChildOwnership"></a><a href="#Parent-ChildOwnership">Parent-Child Ownership</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('parent-child-ownership-relations')">Focus Inspector</button>
+<div class="short narrow example" id="parent-child-ownership-relations"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.parent-child-ownership-relations
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
+    [taoensso.timbre :as log]))
+
+; Not using an atom, so use a tree for app state (will auto-normalize via ident functions)
+(def initial-state {:ui/react-key "abc"
+                    :main-list    {:list/id    1
+                                   :list/name  "My List"
+                                   :list/items [{:item/id 1 :item/label "A"}
+                                                {:item/id 2 :item/label "B"}]}})
+
+(m/defmutation delete-item
+  "Mutation: Delete an item from a list"
+  [{:keys [list-id id]}]
+  (action [{:keys [state]}]
+    (log/info "Deleting item" id "from list" list-id)
+    (swap! state
+      (fn [s]
+        (-&gt; s
+          (update :items dissoc id)
+          (merge/remove-ident* [:items id] [:lists list-id :list/items]))))))
+
+(defsc Item [this
+             {:keys [item/id item/label] :as props}
+             {:keys [on-delete] :as computed}]              ;; <b class="conum">(1)</b>
+  {:initial-state (fn [{:keys [id label]}] {:item/id id :item/label label})
+   :query         [:item/id :item/label]
+   :ident         [:items :item/id]}
+  (dom/li label (dom/button {:onClick #(on-delete id)} "X")))
+
+(def ui-list-item (comp/factory Item {:keyfn :item/id}))
+
+(defsc ItemList [this {:list/keys [id name items]}]
+  {:initial-state (fn [p] {:list/id    1
+                           :list/name  "List 1"
+                           :list/items [(comp/get-initial-state Item {:id 1 :label "A"})
+                                        (comp/get-initial-state Item {:id 2 :label "B"})]})
+   :query         [:list/id :list/name {:list/items (comp/get-query Item)}]
+   :ident         [:lists :list/id]}
+  (let [delete-item (fn [item-id] (comp/transact! this [(delete-item {:list-id id :id item-id})])) ;; <b class="conum">(2)</b>
+        item-props  (fn [i] (comp/computed i {:on-delete delete-item}))]
+    (dom/div
+      (dom/h4 name)
+      (dom/ul
+        (map #(ui-list-item (item-props %)) items)))))
+
+(def ui-list (comp/factory ItemList))
+
+(defsc Root [this {:keys [main-list]}]
+  {:initial-state (fn [p] {:main-list (comp/get-initial-state ItemList {})})
+   :query         [{:main-list (comp/get-query ItemList)}]}
+  (dom/div (ui-list main-list)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 35. <a id="Premerge-usingpostmutations"></a><a href="#Premerge-usingpostmutations">Pre merge - using post mutations</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('pre-merge-postmutations')">Focus Inspector</button>
+<div class="short narrow example" id="pre-merge-postmutations"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.post-mutation-countdown
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}])
+
+(pc/defresolver counter-resolver [env {::keys [counter-id]}]
+  {::pc/input  #{::counter-id}
+   ::pc/output [::counter-id ::counter-label]}
+  (let [{:keys [id]} (-&gt; env :ast :params)]
+    (first (filter #(= id (::counter-id %)) all-counters))))
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(m/defmutation initialize-counter [{::keys [counter-id]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [::counter-id counter-id] #(merge {:ui/count 5} %))))
+
+(defsc Countdown [this {::keys   [counter-label]
+                        :ui/keys [count]}]
+  {:ident [::counter-id ::counter-id]
+   :query [::counter-id ::counter-label :ui/count]}
+  (dom/div
+    (dom/h4 counter-label)
+    (let [done? (zero? count)]
+      (dom/button {:disabled done?
+                   :onClick  #(m/set-value! this :ui/count (dec count))}
+        (if done? "Done!" (str count))))))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {:keys [counter]}]
+  {:initial-state (fn [_] {})
+   :query         [{:counter (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq counter)
+      (ui-countdown counter)
+      (dom/button {:onClick #(df/load! this [::counter-id 1] Countdown
+                               {:target               [:counter]
+                                :post-mutation        `initialize-counter
+                                :post-mutation-params {::counter-id 1}})}
+        "Load one counter"))))
+
+(defn initialize
+  "To be used in :started-callback to pre-load things."
+  [app])</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 36. <a id="Premerge-usingpostmutationstomany"></a><a href="#Premerge-usingpostmutationstomany">Pre merge - using post mutations to many</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('pre-merge-postmutations-many')">Focus Inspector</button>
+<div class="short narrow example" id="pre-merge-postmutations-many"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.post-mutation-countdown-many
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}
+   {::counter-id 2 ::counter-label "B"}
+   {::counter-id 3 ::counter-label "C"}
+   {::counter-id 4 ::counter-label "D"}])
+
+(pc/defresolver counter-resolver [env _]
+  {::pc/output [{::all-counters [::counter-id ::counter-label]}]}
+  {::all-counters all-counters})
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(m/defmutation initialize-counters [_]
+  (action [{:keys [state]}]
+    (swap! state
+      (fn [state]
+        (reduce
+          (fn [state ref]
+            (update-in state ref #(merge {:ui/count 5} %)))
+          state
+          (get state ::all-counters))))))
+
+(defsc Countdown [this {::keys   [counter-label]
+                        :ui/keys [count]}]
+  {:ident [::counter-id ::counter-id]
+   :query [::counter-id ::counter-label :ui/count]}
+  (dom/div
+    (dom/h4 counter-label)
+    (let [done? (zero? count)]
+      (dom/button {:disabled done?
+                   :onClick  #(m/set-value! this :ui/count (dec count))}
+        (if done? "Done!" (str count))))))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {})
+   :query         [{::all-counters (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq all-counters)
+      (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+        (mapv ui-countdown all-counters))
+      (dom/button {:onClick #(df/load! this ::all-counters Countdown
+                               {:post-mutation `initialize-counters})}
+        "Load many counters"))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 37. <a id="Premerge"></a><a href="#Premerge">Pre merge</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('countdown-single')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-single"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}])
+
+(pc/defresolver counter-resolver [env {::keys [counter-id]}]
+  {::pc/input  #{::counter-id}
+   ::pc/output [::counter-id ::counter-label]}
+  (let [{:keys [id]} (-&gt; env :ast :params)]
+    (first (filter #(= id (::counter-id %)) all-counters))))
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsc Countdown [this {::keys   [counter-label]
+                        :ui/keys [count]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  {:ui/count 5}
+                  current-normalized
+                  data-tree))}
+  (dom/div
+    (dom/h4 counter-label)
+    (let [done? (zero? count)]
+      (dom/button {:disabled done?
+                   :onClick  #(m/set-value! this :ui/count (dec count))}
+        (if done? "Done!" (str count))))))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {:keys [counter]}]
+  {:initial-state (fn [_] {})
+   :query         [{:counter (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq counter)
+      (ui-countdown counter)
+      (dom/button {:onClick #(df/load! this [::counter-id 1] Countdown {:target [:counter]})}
+        "Load one counter"))))
+
+(defn initialize
+  "To be used in :started-callback to pre-load things."
+  [app])</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 38. <a id="Premerge-tomany"></a><a href="#Premerge-tomany">Pre merge - to many</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('countdown-many')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-many"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown-many
+  (:require
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}
+   {::counter-id 2 ::counter-label "B"}
+   {::counter-id 3 ::counter-label "C"}
+   {::counter-id 4 ::counter-label "D"}])
+
+(pc/defresolver counter-resolver [env _]
+  {::pc/output [{::all-counters [::counter-id ::counter-label]}]}
+  {::all-counters all-counters})
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsc Countdown [this {::keys   [counter-label]
+                        :ui/keys [count]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  {:ui/count 5}
+                  current-normalized
+                  data-tree))}
+  (dom/div
+    (dom/h4 counter-label)
+    (let [done? (zero? count)]
+      (dom/button {:disabled done?
+                   :onClick  #(m/set-value! this :ui/count (dec count))}
+        (if done? "Done!" (str count))))))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {})
+   :query         [{::all-counters (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq all-counters)
+      (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+        (mapv ui-countdown all-counters))
+      (dom/button {:onClick #(df/load! this ::all-counters Countdown)}
+        "Load many counters"))))
+
+(defn initialize
+  "To be used in :started-callback to pre-load things."
+  [app])</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 39. <a id="Premerge-withinitial"></a><a href="#Premerge-withinitial">Pre merge - with initial</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('countdown-with-initial')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-with-initial"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown-with-initial
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.wsscode.pathom.connect :as pc]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}
+   {::counter-id 2 ::counter-label "B" ::counter-initial 10}
+   {::counter-id 3 ::counter-label "C" ::counter-initial 2}
+   {::counter-id 4 ::counter-label "D"}])
+
+(pc/defresolver counter-resolver [env _]
+  {::pc/output [{::all-counters [::counter-id ::counter-label ::counter-initial]}]}
+  {::all-counters all-counters})
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def default-count 5)
+
+(defsc Countdown [this {::keys   [counter-label counter-initial]
+                        :ui/keys [count]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label ::counter-initial :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  ; <b class="conum">(1)</b>
+                  {:ui/count (or (merge/nilify-not-found (::counter-initial data-tree)) default-count)}
+                  current-normalized
+                  data-tree))}
+  (dom/div
+    (dom/h4 (str counter-label " [" (or counter-initial default-count) "]"))
+    (let [done? (zero? count)]
+      (dom/button {:disabled done?
+                   :onClick  #(m/set-value! this :ui/count (dec count))}
+        (if done? "Done!" (str count))))))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {})
+   :query         [{::all-counters (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq all-counters)
+      (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+        (mapv ui-countdown all-counters))
+      (dom/button {:onClick #(df/load! this ::all-counters Countdown)}
+        "Load many counters"))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 40. <a id="Premerge-extractedui"></a><a href="#Premerge-extractedui">Pre merge - extracted ui</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('countdown-extracted')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-extracted"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown-extracted
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
+    [com.wsscode.pathom.connect :as pc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}
+   {::counter-id 2 ::counter-label "B" ::counter-initial 10}
+   {::counter-id 3 ::counter-label "C" ::counter-initial 2}
+   {::counter-id 4 ::counter-label "D"}])
+
+(pc/defresolver counter-resolver [env _]
+  {::pc/output [{::all-counters [::counter-id ::counter-label]}]}
+  {::all-counters all-counters})
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def default-count 5)
+
+(defsc CountdownButton [this {:ui/keys [count]}]
+  {:ident     [:ui/id :ui/id]
+   :query     [:ui/id :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  ; <b class="conum">(1)</b>
+                  {:ui/id    (random-uuid)
+                   :ui/count default-count}
+                  current-normalized
+                  data-tree))}
+  (let [done? (zero? count)]
+    (dom/button {:disabled done?
+                 :onClick  #(m/set-value! this :ui/count (dec count))}
+      (if done? "Done!" (str count)))))
+
+(def ui-countdown-button (comp/factory CountdownButton {:keyfn ::counter-id}))
+
+(defsc Countdown [this {::keys   [counter-label counter-initial]
+                        :ui/keys [counter]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label ::counter-initial
+               {:ui/counter (comp/get-query CountdownButton)}]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (let [initial (merge/nilify-not-found (::counter-initial data-tree))]
+                  (merge
+                    ; <b class="conum">(2)</b>
+                    {:ui/counter (cond-&gt; {} initial (assoc :ui/count initial))}
+                    current-normalized
+                    data-tree)))}
+  (dom/div
+    (dom/h4 (str counter-label " [" (or counter-initial default-count) "]"))
+    (ui-countdown-button counter)))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {})
+   :query         [{::all-counters (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (if (seq all-counters)
+      (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+        (mapv ui-countdown all-counters))
+      (dom/button {:onClick #(df/load! this ::all-counters Countdown)}
+        "Load many counters"))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 41. <a id="Premerge-initial"></a><a href="#Premerge-initial">Pre merge - initial</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('state countdown-initial-state')">Focus Inspector</button>
+<div class="short narrow example" id="state countdown-initial-state"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown-initial-state
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.wsscode.pathom.connect :as pc]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [taoensso.timbre :as log]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def all-counters
+  [{::counter-id 1 ::counter-label "A"}
+   {::counter-id 2 ::counter-label "B" ::counter-initial 10}
+   {::counter-id 3 ::counter-label "C" ::counter-initial 2}
+   {::counter-id 4 ::counter-label "D"}])
+
+(pc/defresolver counter-resolver [env _]
+  {::pc/output [{::all-counters [::counter-id ::counter-label]}]}
+  {::all-counters all-counters})
+
+(def resolvers [counter-resolver])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def default-count 5)
+
+(defsc CountdownButton [this {:ui/keys [count]}]
+  {:ident     [:ui/id :ui/id]
+   :query     [:ui/id :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  {:ui/id    (random-uuid)
+                   :ui/count default-count}
+                  current-normalized
+                  data-tree))}
+  (let [done? (zero? count)]
+    (dom/button {:disabled done?
+                 :onClick  #(m/set-value! this :ui/count (dec count))}
+      (if done? "Done!" (str count)))))
+
+(def ui-countdown-button (comp/factory CountdownButton {:keyfn ::counter-id}))
+
+(defsc Countdown [this {::keys   [counter-label counter-initial]
+                        :ui/keys [counter]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label ::counter-initial
+               {:ui/counter (comp/get-query CountdownButton)}]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (let [initial (merge/nilify-not-found (::counter-initial data-tree))]
+                  (log/spy :info (merge
+                                   {:ui/counter (cond-&gt; {} initial (assoc :ui/count initial))}
+                                   current-normalized
+                                   data-tree))))}
+  (dom/div
+    (dom/h4 (str counter-label " [" (or counter-initial default-count) "]"))
+    (ui-countdown-button counter)))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {::all-counters
+                           [{::counter-id    (tempid/tempid)
+                             ::counter-label "X"}
+                            {::counter-id    (tempid/tempid)
+                             ::counter-label "Y"}
+                            {::counter-id      (tempid/tempid)
+                             ::counter-label   "Z"
+                             ::counter-initial 9}]})
+   :query         [{::all-counters (comp/get-query Countdown)}]}
+  (dom/div
+    (dom/h3 "Counters")
+    (when (seq all-counters)
+      (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+        (mapv ui-countdown all-counters)))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 42. <a id="Premerge-mutation"></a><a href="#Premerge-mutation">Pre merge - mutation</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('countdown-mutation')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-mutation"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.pre-merge.countdown-mutation
+  (:require
+    [book.demos.util :refer [now]]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.algorithms.merge :as merge]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def default-count 5)
+
+(defsc CountdownButton [this {:ui/keys [count]}]
+  {:ident     [:ui/id :ui/id]
+   :query     [:ui/id :ui/count]
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (merge
+                  {:ui/id    (random-uuid)
+                   :ui/count default-count}
+                  current-normalized
+                  data-tree))}
+  (let [done? (zero? count)]
+    (dom/button {:disabled done?
+                 :onClick  #(m/set-value! this :ui/count (dec count))}
+      (if done? "Done!" (str count)))))
+
+(def ui-countdown-button (comp/factory CountdownButton {:keyfn ::counter-id}))
+
+(defsc Countdown [this {::keys   [counter-label counter-initial]
+                        :ui/keys [counter]}]
+  {:ident     [::counter-id ::counter-id]
+   :query     [::counter-id ::counter-label ::counter-initial
+               {:ui/counter (comp/get-query CountdownButton)}]
+   :pre-merge (fn [{:keys [current-normalized data-tree] :as x}]
+                (let [initial (merge/nilify-not-found (::counter-initial data-tree))]
+                  (merge
+                    {:ui/counter (cond-&gt; {} initial (assoc :ui/count initial))}
+                    current-normalized
+                    data-tree)))}
+  (dom/div
+    (dom/h4 (str counter-label " [" (or counter-initial default-count) "]"))
+    (ui-countdown-button counter)))
+
+(def ui-countdown (comp/factory Countdown {:keyfn ::counter-id}))
+
+(m/defmutation create-countdown [countdown]
+  (action [{:keys [state ref]}]
+    (swap! state merge/merge-component Countdown countdown :append [::all-counters])
+    (swap! state update-in ref assoc :ui/new-countdown-label "")))
+
+(defsc Root [this {::keys [all-counters]}]
+  {:initial-state (fn [_] {::all-counters
+                           [{::counter-id    (tempid/tempid)
+                             ::counter-label "X"}
+                            {::counter-id    (tempid/tempid)
+                             ::counter-label "Y"}
+                            {::counter-id      (tempid/tempid)
+                             ::counter-label   "Z"
+                             ::counter-initial 9}]})
+   :query         [{::all-counters (comp/get-query Countdown)}
+                   :ui/new-countdown-label]}
+  (dom/div
+    (dom/h3 "Counters")
+    (dom/button {:onClick #(comp/transact! this [`(create-countdown ~{::counter-id    (tempid/tempid)
+                                                                      ::counter-label "New"})])}
+      "Add counter")
+    (dom/div {:style {:display "flex" :alignItems "center" :justifyContent "space-between"}}
+      (mapv ui-countdown all-counters))))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 43. <a id="ErrorHandling"></a><a href="#ErrorHandling">Error Handling</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('server-error-handling')">Focus Inspector</button>
+<div class="short narrow example" id="server-error-handling"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.server-error-handling
+  (:require
+    [fulcro.client :as fc]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [fulcro.logging :as log]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [fulcro.server :as server]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [taoensso.timbre :as log]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(server/defmutation error-mutation [params]
+  ;; Throw a mutation error for the client to handle
+  (action [env] (throw (ex-info "Server error" {:type :com.fulcrologic.fulcro.components/abort :status 401 :body "Unauthorized User"}))))
+
+(server/defquery-entity :error.child/by-id
+  (value [env id params]
+    (throw (ex-info "other read error" {:status 403 :body "Not allowed."}))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Just send the mutation to the server, which will return an error
+(defmutation error-mutation [params]
+  (remote [env] true))
+
+;; an :error key is injected into the fallback mutation's params argument
+(defmutation disable-button [{:keys [error ::comp/ref] :as params}]
+  (action [{:keys [state]}]
+    (log/warn "Mutation specific fallback -- disabling button due to error from mutation invoked at " ref)
+    (swap! state assoc-in [:error.child/by-id :singleton :ui/button-disabled] true)))
+
+(defmutation log-read-error [{:keys [error]}]
+  (action [env] (log/warn "Read specific fallback: " error)))
+
+(defsc Child [this {:keys [fulcro/server-error ui/button-disabled]}]
+  ;; you can query for the server-error using a link from any component that composes to root
+  {:initial-state (fn [p] {})
+   :query         (fn [] [[:fulcro/server-error '_] :ui/button-disabled :fulcro/read-error])
+   :ident         (fn [] [:error.child/by-id :singleton])}  ; lambda so we get a *literal* ident
+  (dom/div
+    ;; declare a tx/fallback in the same transact call as the mutation
+    ;; if the mutation fails, the fallback will be called
+    (dom/button {:onClick #(df/load this :data nil {:fallback `log-read-error})}
+      "Click me to try a read with a fallback (logs to console)")
+    (dom/button {:onClick  #(comp/transact! this `[(error-mutation {}) (df/fallback {:action disable-button})])
+                 :disabled button-disabled}
+      "Click me for error (disables on error)!")
+    (dom/button {:onClick #(df/load-field this :fulcro/read-error)}
+      "Click me for other error!")
+    (dom/div "Server error (root level): " (str server-error))))
+
+(def ui-child (comp/factory Child))
+
+(defsc Root [this {:keys [child]}]
+  {:initial-state (fn [params] {:child (comp/get-initial-state Child {})})
+   :query         [{:child (comp/get-query Child)}]}
+  (dom/div (ui-child child)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 44. <a id="QuerySecurity"></a><a href="#QuerySecurity">Query Security</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('server-query-security')">Focus Inspector</button>
+<div class="short narrow example" id="server-query-security"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.server-query-security
+  (:require
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+    [clojure.set :as set]
+    [clojure.walk :as walk]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [fulcro.server :as server]
+    [com.stuartsierra.component :as c]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [fulcro.logging :as log]
+    [fulcro.client :as fc]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; A map from "entry-level" concept/entity to a set of the allowed graph read/navigation keywords
+(def whitelist {:person #{:name :address :mate}})
+
+(defn keywords-in-query
+  "Returns all of the keywords in the given (arbitrarily nested) query."
+  [query]
+  (let [result (atom #{})
+        _      (walk/prewalk
+                 (fn [k] (if (keyword? k) (swap! result conj k)))
+                 query)]
+    @result))
+
+; TODO: determine if the user is allowed to start at the given keyword for entity with given ID
+(defn authorized-root-entity?
+  "Returns true if the given user is allowed to run a query rooted at the entity indicated by the combination of
+  query keyword and entity ID.
+
+  TODO: Implement some logic here."
+  [user keyword id] true)
+
+(defn is-authorized-query?
+  "Returns true if the given query is ok with respect to the top-level key of the API query (which should have already
+  been authorized by `authorized-root-entity?`."
+  [query top-key]
+  (let [keywords-allowed  (get whitelist top-key #{})
+        insecure-keywords (set/difference (keywords-in-query query) keywords-allowed)]
+    (empty? insecure-keywords)))
+
+(defprotocol Auth
+  (can-access-entity? [this user key entityid] "Check if the given user is allowed to access the entity designated by the given key and entity id")
+  (authorized-query? [this user top-key query] "Check if the given user is allowed to access all of the data in the query that starts at the given join key"))
+
+(defrecord Authorizer []
+  c/Lifecycle
+  (start [this] this)
+  (stop [this] this)
+  Auth
+  (can-access-entity? [this user key entityid] (authorized-root-entity? user key entityid))
+  (authorized-query? [this user top-key query] (is-authorized-query? query top-key)))
+
+(defn make-authorizer [] (map-&gt;Authorizer {}))
+
+(def pretend-database {:person {:id 42 :name "Joe" :address "111 Nowhere" :cc-number "1234-4444-5555-2222"}})
+
+(server/defquery-root :person
+  (value [{:keys [request query] :as env} params]
+    (let [authorization (make-authorizer)
+          user          (:user request)]
+      (log/info (str authorization "w/user" user))
+      (or
+        (and
+          ;; of course, the params would be derived from the request/headers/etc.
+          (can-access-entity? authorization user :person 42)
+          (authorized-query? authorization user :person query))
+        (throw (ex-info "Unauthorized query!" {:status 401 :body {:query query}})))
+      ;; Emulate a datomic pull kind of operation...
+      (select-keys (get pretend-database :person) query))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def initial-state {:ui/react-key "abc"})
+
+(defonce app (atom (fc/make-fulcro-client
+                     {:initial-state    initial-state
+                      :started-callback (fn [{:keys [reconciler]}]
+                                          ; TODO
+                                          )})))
+
+(defsc Person [this {:keys [name address cc-number]}]
+  {:query [:ui/fetch-state :name :address :cc-number]}
+  (dom/div
+    (dom/ul
+      (dom/li (str "name: " name))
+      (dom/li (str "address: " address))
+      (dom/li (str "cc-number: " cc-number)))))
+
+(def ui-person (comp/factory Person))
+
+(defmutation clear-error [params] (action [{:keys [state]}] (swap! state dissoc :fulcro/server-error)))
+
+(defsc Root [this {:keys [person fulcro/server-error] :as props}]
+  {:query [{:person (comp/get-query Person)} :fulcro/server-error]}
+  (dom/div
+    (when server-error
+      (dom/p (pr-str "SERVER ERROR: " server-error)))
+    (dom/button {:onClick (fn []
+                            (comp/transact! this `[(clear-error {})])
+                            (df/load this :person Person {:refresh [:person]}))} "Query for person with credit card")
+    (dom/button {:onClick (fn []
+                            (comp/transact! this `[(clear-error {})])
+                            (df/load this :person Person {:refresh [:person] :without #{:cc-number}}))} "Query for person WITHOUT credit card")
+    (df/lazily-loaded ui-person person)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 45. <a id="ReturnValuesandMutationJoins"></a><a href="#ReturnValuesandMutationJoins">Return Values and Mutation Joins</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('server-return-values-as-data-driven-mutation-joins')">Focus Inspector</button>
+<div class="short narrow example" id="server-return-values-as-data-driven-mutation-joins"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.server-return-values-as-data-driven-mutation-joins
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [fulcro.client :as fc]
+    [fulcro.server :as server]
+    [com.fulcrologic.fulcro.algorithms.misc :as util]
+    [com.fulcrologic.fulcro.data-fetch :as df]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(server/defquery-root :mutation-join-list
+  (value [env {:keys [kind]}]
+    {:db/id      1
+     :list/title "Mutation Join List Demo"
+     :list/items [{:db/id      1
+                   :item/value "A"}
+                  {:db/id      2
+                   :item/value "B"}]}))
+
+(server/defmutation change-label [{:keys [db/id item/value]}]
+  (action [env]
+    {:db/id id :item/value (str (util/unique-key))}))
+
+(def ids (atom 999))
+
+(server/defmutation add-item [{:keys [id value]}]
+  (action [env]
+    (let [new-id (swap! ids inc)]
+      (merge
+        {::comp/tempids {id new-id}}
+        {:db/id id :item/value value}))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(declare Item)
+
+(defmutation change-label [{:keys [db/id]}]
+  (remote [{:keys [ast state]}]
+    (-&gt; ast
+      (m/returning state Item)
+      (m/with-params {:db/id id}))))
+
+(defn set-overlay-visible* [state-map visible?] (assoc-in state-map [:overlay :visible?] visible?))
+(defmutation set-overlay [{:keys [:visible?]}] (action [{:keys [state]}] (swap! state set-overlay-visible* visible?)))
+
+(defmutation add-item [{:keys [list-id id value]}]
+  (action [{:keys [state]}]
+    (let [idnt [:item/by-id id]]
+      (swap! state
+        (fn [s]
+          (-&gt; s
+            (assoc-in idnt {:db/id id :item/value value})
+            (set-overlay-visible* true)
+            (fc/integrate-ident idnt :append [:list/by-id list-id :list/items]))))))
+  (remote [{:keys [state ast]}]
+    (m/returning ast state Item)))
+
+(defsc Item [this {:keys [db/id item/value]}]
+  {:query [:db/id :item/value]
+   :ident [:item/by-id :db/id]}
+  (dom/li {:onClick (fn [evt]
+                      (comp/transact! this `[(change-label {:db/id ~id})]))} value))
+
+(def ui-item (comp/factory Item {:keyfn :db/id}))
+
+(def example-height "400px")
+
+(defsc ItemList [this {:keys [db/id list/title list/items] :as props}]
+  {:query         [:db/id :list/title {:list/items (comp/get-query Item)}]
+   :initial-state {}
+   :ident         [:list/by-id :db/id]}
+  (dom/div {:style {:width "600px" :height example-height}}
+    (dom/h3 title)
+    (dom/ul (map ui-item items))
+    (dom/button {:onClick #(comp/ptransact! this `[(add-item {:list-id ~id
+                                                              :id      ~(comp/tempid)
+                                                              :value   "A New Value"})
+                                                   (set-overlay {:visible? false})
+                                                   :overlay])} "Add item")))
+
+(def ui-list (comp/factory ItemList {:keyfn :db/id}))
+
+(defsc Overlay [this {:keys [:visible?] :as props}]
+  {:query         [:db/id :visible?]
+   :initial-state {:visible? false}}
+  (dom/div {:onClick #(.stopPropagation %)
+            :style   {:backgroundColor "black"
+                      :display         (if visible? "block" "none")
+                      :position        "absolute"
+                      :opacity         "0.6"
+                      :zIndex          "100"
+                      :width           "600px"
+                      :height          example-height}} ""))
+
+(def ui-overlay (comp/factory Overlay {:keyfn :db/id}))
+
+(defsc Root [this {:keys [overlay mutation-join-list]}]
+  {:query         [{:overlay (comp/get-query Overlay)} {:mutation-join-list (comp/get-query ItemList)}]
+   :initial-state {:overlay {} :mutation-join-list {}}}
+  (dom/div {:style {:position "relative"}}
+    (ui-overlay overlay)
+    "Test"
+    (when-not (empty? mutation-join-list)
+      (ui-list mutation-join-list))))
+
+(defn initialize "started callback" [app] (df/load app :mutation-join-list ItemList))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 46. <a id="ManuallyMergingServerMutationReturnValues"></a><a href="#ManuallyMergingServerMutationReturnValues">Manually Merging Server Mutation Return Values</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('server-return-values-manually-merging')">Focus Inspector</button>
+<div class="short narrow example" id="server-return-values-manually-merging"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.server-return-values-manually-merging
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [fulcro.server :as server]
+    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(server/defmutation crank-it-up [{:keys [value]}]
+  (action [env]
+    {:new-volume (inc value)}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti merge-return-value (fn [state sym return-value] sym))
+
+; Do all of the work on the server.
+(m/defmutation crank-it-up [params]
+  (remote [env] true))
+
+(defmethod merge-return-value `crank-it-up
+  [state _ {:keys [new-volume]}]
+  (assoc-in state [:child/by-id 0 :volume] new-volume))
+
+(defsc Child [this {:keys [id volume]}]
+  {:initial-state (fn [params] {:id 0 :volume 5})
+   :query         [:id :volume]
+   :ident         [:child/by-id :id]}
+  (dom/div
+    (dom/p "Current volume: " volume)
+    (dom/button {:onClick #(comp/transact! this `[(crank-it-up ~{:value volume})])} "+")))
+
+(def ui-child (comp/factory Child))
+
+(defsc Root [this {:keys [child]}]
+  {:initial-state (fn [params] {:child (comp/get-initial-state Child {})})
+   :query         [{:child (comp/get-query Child)}]}
+  (dom/div (ui-child child)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 47. <a id="TargetingMutationReturnValues"></a><a href="#TargetingMutationReturnValues">Targeting Mutation Return Values</a></div>
+<div class="content">
+<button class="inspector" onClick="book.main.focus('server-targeting-return-values-into-app-state')">Focus Inspector</button>
+<div class="short narrow example" id="server-targeting-return-values-into-app-state"></div>
+<br/>
+<div class="listingblock source">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns book.demos.server-targeting-return-values-into-app-state
+  (:require
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [fulcro.server :as server]
+    [com.fulcrologic.fulcro.data-fetch :as df]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SERVER:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def ids (atom 1))
+
+(server/defmutation trigger-error [_]
+  (action [env]
+    {:error "something bad"}))
+
+(server/defmutation create-entity [{:keys [db/id]}]
+  (action [env]
+    (let [real-id (swap! ids inc)]
+      {:db/id        real-id
+       :entity/label (str "Entity " real-id)
+       :tempids      {id real-id}})))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CLIENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(declare Item Entity)
+
+(defmutation trigger-error
+  "This mutation causes an unstructured error (just a map), but targets that value
+   to the field `:error-message` on the component that invokes it."
+  [_]
+  (remote [{:keys [ast ref]}]
+    (m/with-target ast (conj ref :error-message))))
+
+(defmutation create-entity
+  "This mutation simply creates a new entity, but targets it to a specific location
+  (in this case the `:child` field of the invoking component)."
+  [{:keys [where?] :as params}]
+  (remote [{:keys [ast ref state]}]
+    (let [path-to-target (conj ref :children)
+          ; replacement cannot succeed if there is nothing present...turn those into appends
+          no-items?      (empty? (get-in @state path-to-target))
+          where?         (if (and no-items? (= :replace-first where?))
+                           :append
+                           where?)]
+      (cond-&gt; (-&gt; ast
+                ; always set what kind of thing is coming back
+                (m/returning state Entity)
+                ; strip the where?...it is for local use only (not server)
+                (m/with-params (dissoc params :where?)))
+        ; Add the targeting...based on where?
+        (= :append where?) (m/with-target (df/append-to path-to-target)) ; where to put it
+        (= :prepend where?) (m/with-target (df/prepend-to path-to-target))
+        (= :replace-first where?) (m/with-target (df/replace-at (conj path-to-target 0)))))))
+
+(defsc Entity [this {:keys [entity/label]}]
+  {:ident [:entity/by-id :db/id]
+   :query [:db/id :entity/label]}
+  (dom/div label))
+
+(def ui-entity (comp/factory Entity {:keyfn :db/id}))
+
+(defsc Item [this {:keys [db/id error-message children]}]
+  {:query         [:db/id :error-message {:children (comp/get-query Entity)}]
+   :initial-state {:db/id :param/id :children []}
+   :ident         [:item/by-id :db/id]}
+  (dom/div {:style {:float  "left"
+                    :width  "200px"
+                    :margin "5px"
+                    :border "1px solid black"}}
+    (dom/h4 (str "Item " id))
+    (when error-message
+      (dom/div "The generated error was: " (pr-str error-message)))
+    (dom/button {:onClick (fn [evt] (comp/transact! this `[(trigger-error {})]))} "Trigger Error")
+    (dom/h6 "Children")
+    (map ui-entity children)
+    (dom/button {:onClick (fn [evt] (comp/transact! this `[(create-entity {:where? :prepend :db/id ~(comp/tempid)})]))} "Prepend one!")
+    (dom/button {:onClick (fn [evt] (comp/transact! this `[(create-entity {:where? :append :db/id ~(comp/tempid)})]))} "Append one!")
+    (dom/button {:onClick (fn [evt] (comp/transact! this `[(create-entity {:where? :replace-first :db/id ~(comp/tempid)})]))} "Replace first one!")))
+
+(def ui-item (comp/factory Item {:keyfn :db/id}))
+
+(defsc Root [this {:keys [root/items]}]
+  {:query         [{:root/items (comp/get-query Item)}]
+   :initial-state {:root/items [{:id 1} {:id 2} {:id 3}]}}
+  (dom/div
+    (mapv ui-item items)
+    (dom/br {:style {:clear "both"}})))</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-06-30 22:16:53 +0530
+Last updated 2019-07-01 00:07:21 +0530
 </div>
 </div>
 </body>

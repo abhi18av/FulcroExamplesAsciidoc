@@ -39,34 +39,648 @@
 ----
 ====
 
-Second attempt
+All examples now
 
 
 .[[SampleExample]]<<SampleExample,Sample Example>>
 ====
 ++++
-<button class="inspector" onClick="book.main.focus('d3')">Focus Inspector</button>
-<div class="short narrow example" id="d3-id"></div>
+<button class="inspector" onClick="book.main.focus('example-1')">Focus Inspector</button>
+<div class="short narrow example" id="example-1"></div>
 <br/>
 ++++
 [source,clojure,role="source"]
 ----
-include::src/d3_example.cljs[]
+include::src/book/example_1.cljs[]
 ----
 ====
 
-//Third attempt
 
-
-.[[SampleExample]]<<SampleExample,Sample Example>>
+.[[D3]]<<D3,D3>>
 ====
 ++++
-<button class="inspector" onClick="book.main.focus('hover')">Focus Inspector</button>
-<div class="short narrow example" id="hover-id"></div>
+<button class="inspector" onClick="book.main.focus('ui-d3')">Focus Inspector</button>
+<div class="short narrow example" id="ui-d3"></div>
 <br/>
 ++++
 [source,clojure,role="source"]
 ----
-include::src/hover_example.cljs[]
+include::src/book/ui/d3_example.cljs[]
+----
+====
+
+
+.[[InputFocusandReactRefsLifecycle]]<<InputFocusandReactRefsLifecycle,Input Focus and React Refs Lifecycle>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('focus-example')">Focus Inspector</button>
+<div class="short narrow example" id="focus-example"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/ui/focus_example.cljs[]
+----
+====
+
+
+.[[DrawinginaCanvas]]<<DrawinginaCanvas,Drawing in a Canvas>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('hover-example')">Focus Inspector</button>
+<div class="short narrow example" id="hover-example"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/ui/hover_example.cljs[]
+----
+====
+
+
+.[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
+<div class="short narrow example" id="victory-example"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/ui/victory_example.cljs[]
+----
+====
+
+
+.[[UnionstoSelectType]]<<UnionstoSelectType,Unions to Select Type>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('union-example-1')">Focus Inspector</button>
+<div class="short narrow example" id="union-example-1"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/union_example_1.cljs[]
+----
+====
+
+
+.[[UIBlocking]]<<UIBlocking,UI Blocking>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('ui-blocking-example')">Focus Inspector</button>
+<div class="short narrow example" id="ui-blocking-example"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/server/ui_blocking_example.cljs[]
+----
+====
+
+
+.[[DynamicQuery]]<<DynamicQuery,Dynamic Query>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('dynamic-queries')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-queries"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/dynamic_queries.cljs[]
+----
+====
+
+
+.[[DynamicQueryParameters]]<<DynamicQueryParameters,Dynamic Query Parameters>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('dynamic-query-parameters')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-query-parameters"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/dynamic_query_parameters.cljs[]
+----
+====
+
+
+.[[RoutingDemo]]<<RoutingDemo,Routing Demo>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('ui-routing')">Focus Inspector</button>
+<div class="short narrow example" id="ui-routing"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/ui_routing.cljs[]
+----
+====
+
+
+.[[SimpleRouter]]<<SimpleRouter,Simple Router>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('simple-router-1')">Focus Inspector</button>
+<div class="short narrow example" id="simple-router-1"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/simple_router_1.cljs[]
+----
+====
+
+
+.[[NestedRouter]]<<NestedRouter,Nested Router>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('simple-router-2')">Focus Inspector</button>
+<div class="short narrow example" id="simple-router-2"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/simple_router_2.cljs[]
+----
+====
+
+
+.[[TreetoDBwithQueries]]<<TreetoDBwithQueries,Tree to DB with Queries>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('tree-to-db')">Focus Inspector</button>
+<div class="short narrow example" id="tree-to-db"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/tree_to_db.cljs[]
+----
+====
+
+
+.[[MergingwithaComponent]]<<MergingwithaComponent,Merging with a Component>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('merge-component')">Focus Inspector</button>
+<div class="short narrow example" id="merge-component"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/merge_component.cljs[]
+----
+====
+
+
+.[[HTMLConverter]]<<HTMLConverter,HTML Converter>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('html-converter')">Focus Inspector</button>
+<div class="short narrow example" id="html-converter"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/html_converter.cljs[]
+----
+====
+
+
+.[[EditingExistingData]]<<EditingExistingData,Editing Existing Data>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('form-state-demo-1')">Focus Inspector</button>
+<div class="short narrow example" id="form-state-demo-1"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/forms/form_state_demo_1.cljs[]
+----
+====
+
+
+.[[NetworkInteractionsandForms]]<<NetworkInteractionsandForms,Network Interactions and Forms>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('form-state-demo-2')">Focus Inspector</button>
+<div class="short narrow example" id="form-state-demo-2"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/forms/form_state_demo_2.cljs[]
+----
+====
+
+
+.[[Autocomplete]]<<Autocomplete,Autocomplete>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('autocomplete-demo')">Focus Inspector</button>
+<div class="short narrow example" id="autocomplete-demo"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/autocomplete.cljs[]
+----
+====
+
+
+.[[CascadingDropdowns]]<<CascadingDropdowns,Cascading Dropdowns>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('cascading-dropdowns')">Focus Inspector</button>
+<div class="short narrow example" id="cascading-dropdowns"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/cascading_dropdowns.cljs[]
+----
+====
+
+
+.[[DynamicUIRouting]]<<DynamicUIRouting,Dynamic UI Routing>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('dynamic-ui-routing')">Focus Inspector</button>
+<div class="short narrow example" id="dynamic-ui-routing"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/dynamic_ui_routing.cljs[]
+----
+====
+
+
+.[[RecursiveDemo1]]<<RecursiveDemo1,Recursive Demo 1>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('recursive-demo-1')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-1"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/recursive_demo_1.cljs[]
+----
+====
+
+
+.[[RecursiveDemo2]]<<RecursiveDemo2,Recursive Demo 2>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('recursive-demo-2')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-2"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/recursive_demo_2.cljs[]
+----
+====
+
+
+.[[RecursiveDemo3]]<<RecursiveDemo3,Recursive Demo 3>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('recursive-demo-3')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-3"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/recursive_demo_3.cljs[]
+----
+====
+
+
+.[[RecursiveDemo4]]<<RecursiveDemo4,Recursive Demo 4>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('recursive-demo-bullets')">Focus Inspector</button>
+<div class="short narrow example" id="recursive-demo-bullets"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/queries/recursive_demo_bullets.cljs[]
+----
+====
+
+
+.[[LoadingDataBasics]]<<LoadingDataBasics,Loading Data Basics>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('loading-data-basics')">Focus Inspector</button>
+<div class="short narrow example" id="loading-data-basics"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/loading_data_basics.cljs[]
+----
+====
+
+
+.[[LoadingDataandTargetingEntities]]<<LoadingDataandTargetingEntities,Loading Data and Targeting Entities>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('loading-data-targeting-entities')">Focus Inspector</button>
+<div class="short narrow example" id="loading-data-targeting-entities"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/loading_data_targeting_entities.cljs[]
+----
+====
+
+
+.[[LoadingInResponseToUIRouting]]<<LoadingInResponseToUIRouting,Loading In Response To UI Routing>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('loading-in-response-to-UI-routing')">Focus Inspector</button>
+<div class="short narrow example" id="loading-in-response-to-UI-routing"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/loading_in_response_to_UI_routing.cljs[]
+----
+====
+
+
+.[[LoadingIndicators]]<<LoadingIndicators,Loading Indicators>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('loading-indicators')">Focus Inspector</button>
+<div class="short narrow example" id="loading-indicators"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/loading_indicators.cljs[]
+----
+====
+
+
+.[[InitialState]]<<InitialState,Initial State>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('initial-app-state')">Focus Inspector</button>
+<div class="short narrow example" id="initial-app-state"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/initial_app_state.cljs[]
+----
+====
+
+
+.[[LegacyLoadIndicators]]<<LegacyLoadIndicators,Legacy Load Indicators>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('legacy-load-indicators')">Focus Inspector</button>
+<div class="short narrow example" id="legacy-load-indicators"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/legacy_load_indicators.cljs[]
+----
+====
+
+
+.[[PaginatingListsFromServer]]<<PaginatingListsFromServer,Paginating Lists From Server>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('paginating-large-lists-from-server')">Focus Inspector</button>
+<div class="short narrow example" id="paginating-large-lists-from-server"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/paginating_large_lists_from_server.cljs[]
+----
+====
+
+
+.[[Parallelvs.SequentialLoading]]<<Parallelvs.SequentialLoading,Parallel vs. Sequential Loading>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('parallel-vs-sequential-loading')">Focus Inspector</button>
+<div class="short narrow example" id="parallel-vs-sequential-loading"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/parallel_vs_sequential_loading.cljs[]
+----
+====
+
+
+.[[Parent-ChildOwnership]]<<Parent-ChildOwnership,Parent-Child Ownership>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('parent-child-ownership-relations')">Focus Inspector</button>
+<div class="short narrow example" id="parent-child-ownership-relations"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/parent_child_ownership_relations.cljs[]
+----
+====
+
+
+.[[Premerge-usingpostmutations]]<<Premerge-usingpostmutations,Pre merge - using post mutations>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('pre-merge-postmutations')">Focus Inspector</button>
+<div class="short narrow example" id="pre-merge-postmutations"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/post_mutation_countdown.cljs[]
+----
+====
+
+
+.[[Premerge-usingpostmutationstomany]]<<Premerge-usingpostmutationstomany,Pre merge - using post mutations to many>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('pre-merge-postmutations-many')">Focus Inspector</button>
+<div class="short narrow example" id="pre-merge-postmutations-many"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/post_mutation_countdown_many.cljs[]
+----
+====
+
+
+.[[Premerge]]<<Premerge,Pre merge>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('countdown-single')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-single"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown.cljs[]
+----
+====
+
+
+.[[Premerge-tomany]]<<Premerge-tomany,Pre merge - to many>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('countdown-many')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-many"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown_many.cljs[]
+----
+====
+
+
+.[[Premerge-withinitial]]<<Premerge-withinitial,Pre merge - with initial>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('countdown-with-initial')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-with-initial"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown_with_initial.cljs[]
+----
+====
+
+
+.[[Premerge-extractedui]]<<Premerge-extractedui,Pre merge - extracted ui>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('countdown-extracted')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-extracted"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown_extracted.cljs[]
+----
+====
+
+
+.[[Premerge-initial]]<<Premerge-initial,Pre merge - initial>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('state countdown-initial-state')">Focus Inspector</button>
+<div class="short narrow example" id="state countdown-initial-state"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown_initial_state.cljs[]
+----
+====
+
+
+.[[Premerge-mutation]]<<Premerge-mutation,Pre merge - mutation>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('countdown-mutation')">Focus Inspector</button>
+<div class="short narrow example" id="countdown-mutation"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/pre_merge/countdown_mutation.cljs[]
+----
+====
+
+
+.[[ErrorHandling]]<<ErrorHandling,Error Handling>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('server-error-handling')">Focus Inspector</button>
+<div class="short narrow example" id="server-error-handling"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/server_error_handling.cljs[]
+----
+====
+
+
+.[[QuerySecurity]]<<QuerySecurity,Query Security>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('server-query-security')">Focus Inspector</button>
+<div class="short narrow example" id="server-query-security"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/server_query_security.cljs[]
+----
+====
+
+
+.[[ReturnValuesandMutationJoins]]<<ReturnValuesandMutationJoins,Return Values and Mutation Joins>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('server-return-values-as-data-driven-mutation-joins')">Focus Inspector</button>
+<div class="short narrow example" id="server-return-values-as-data-driven-mutation-joins"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/server_return_values_as_data_driven_mutation_joins.cljs[]
+----
+====
+
+
+.[[ManuallyMergingServerMutationReturnValues]]<<ManuallyMergingServerMutationReturnValues,Manually Merging Server Mutation Return Values>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('server-return-values-manually-merging')">Focus Inspector</button>
+<div class="short narrow example" id="server-return-values-manually-merging"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/server_return_values_manually_merging.cljs[]
+----
+====
+
+
+.[[TargetingMutationReturnValues]]<<TargetingMutationReturnValues,Targeting Mutation Return Values>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('server-targeting-return-values-into-app-state')">Focus Inspector</button>
+<div class="short narrow example" id="server-targeting-return-values-into-app-state"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/demos/server_targeting_return_values_into_app_state.cljs[]
 ----
 ====

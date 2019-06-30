@@ -3,26 +3,32 @@
 # Usage
 #
 #   $example$ "Using External React Libraries", "victory_id", "./src/victory_example.cljs"]
-#
+
 ##############
 #   Which in turn gets converted into
 ##############
 =begin
 
-  .[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
-  ====
-  ++++
-  <button class="inspector" onClick="book.main.focus('victory-id')">Focus Inspector</button>
-  <div class="short narrow example" id="victory-id"></div>
-  <br/>
-  ++++
-  [source,clojure,role="source"]
-  ----
-  include::src/book/book/ui/victory_example.cljs[]
-  ----
-  ====
+.[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('victory-id')">Focus Inspector</button>
+<div class="short narrow example" id="victory-id"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/book/ui/victory_example.cljs[]
+----
+====
 
 =end
+
+
+##############
+# Extension code
+##############
+
 
 
 require 'asciidoctor/extensions'
@@ -34,7 +40,7 @@ include Asciidoctor
 
 def create_asciidoc_block example_name, example_id, example_source
 
-  anchor_name = example_name.gsub!(/\s+/, '')
+  anchor_name = example_name.gsub(/\s+/, '')
   return %{
 .[[#{anchor_name}]]<<#{anchor_name},#{example_name}>>
 ====
@@ -72,8 +78,8 @@ class FulcroPreprocessor < Extensions::Preprocessor
         line
       end
     end
-    # TODO Remove the generation of the intermediate Expanded file
     reader.unshift_all(replacement_lines)
+    # TODO Remove the generation of the intermediate Expanded file
     File.open("DevelopersGuide.adoc", "w") { |file| file.puts reader.lines}
     reader
   end
