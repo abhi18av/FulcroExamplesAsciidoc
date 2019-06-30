@@ -1,0 +1,9 @@
+version: '1'
+
+tasks:
+  simple:
+    cmds:
+      - asciidoctor -o sample-with-front-matter.html -b html5 sample-with-front-matter.adoc
+  extension:
+    cmds:
+      - asciidoctor -o sample-with-front-matter.html -b html5 -r ./register_extension.rb sample-with-front-matter.adoc
