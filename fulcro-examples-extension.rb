@@ -4,33 +4,69 @@
 #
 #   $example$ "example_name", "example_id", "example_source"]
 #   $example$ "victory_name", "victory_id", "./src/victory_example.cljs"]
+##############
+#   This gets converted into
+##############
+#
+# .[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
+#   ====
+#   ++++
+#   <button class="inspector" onClick="book.main.focus('victory-example')">Focus Inspector</button>
+#   <div class="short narrow example" id="victory-example"></div>
+#   <br/>
+#   ++++
+#   [source,clojure,role="source"]
+#   ----
+#   include::src/book/book/ui/victory_example.cljs[]
+#   ----
+#   ====
 #
 
-require 'asciidoctor/extensions' 
+
+require 'asciidoctor/extensions'
 
 include Asciidoctor
 
-class TeXPreprocessor < Extensions::Preprocessor
 
-  # Map $...$ to stem:[...]
-  exampleShortForm = /(^|\s|\()\$(.*?)\$($|\s|\)|,|\.)/
-  exampleFullForm = '\1latexmath:[\2]\3'
+
+
+def create_asciidoc_block example_name, example_id, example_source
+  return %{
+.[[UsingExternalReactLibraries]]<<UsingExternalReactLibraries,Using External React Libraries>>
+  ====
+  ++++
+  <button class="inspector" onClick="book.main.focus('#{example_name}')">Focus Inspector</button>
+  <div class="short narrow example" id="#{example_id}"></div>
+  <br/>
+  ++++
+  [source,clojure,role="source"]
+  ----
+  include::#{example_source}[]
+  ----
+  ====
+}
+end
+
+
+
+
+class TeXPreprocessor < Extensions::Preprocessor
 
   def process document, reader
     return reader if reader.eof?
     replacement_lines = reader.read_lines.map do |line|
       if(line.include? '$example$')
         parameters = line.split("$")[2]
-        puts parameters.split(",")[0]
-        puts parameters.split(",")[1]
-        puts parameters.split(",")[2]
-        (line.gsub exampleShortForm, exampleFullForm)
+        example_name = parameters.split(",")[0]
+        example_id = parameters.split(",")[1]
+        example_source =  parameters.split(",")[2]
+        fullform = create_asciidoc_block(example_name, example_id, example_source)
+        puts fullform
+        (line.gsub line, fullform)
       else line
       end
     end
     reader.unshift_lines replacement_lines
     reader
   end
-
 end
-
