@@ -23,8 +23,6 @@ $ rm -rf DevelopersGuideSource.html
 
 - Finally, we create the Asciidoc outputs such as HTML using the following command
 
-== On the terminal
-
 ```
 asciidoctor -o DevelopersGuide.html -b html5  -r asciidoctor-diagram DevelopersGuide.adoc
 
