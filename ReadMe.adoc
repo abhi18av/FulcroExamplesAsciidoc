@@ -12,12 +12,31 @@ $example$ D3,ui-d3,src/book/ui/d3_example.cljs
 ----
 
 - The second step is to expand all such invocations into a proper Asciidoc markup. This is done by calling the following command on the terminal
+
 ```
 $ asciidoctor  -r ./register-fulcro-examples.rb DevelopersGuideSource.adoc
 
 # Delete the extra DevelopersGuideSource.html
 $ rm -rf DevelopersGuideSource.html
 
+```
+
+- This creates the file `DevelopersGuide.adoc` which contains fully expanded examples such as 
+
+[source, ]
+```
+
+.[[D3]]<<D3,D3>>
+====
+++++
+<button class="inspector" onClick="book.main.focus('ui-d3')">Focus Inspector</button>
+<div class="short narrow example" id="ui-d3"></div>
+<br/>
+++++
+[source,clojure,role="source"]
+----
+include::src/book/ui/d3_example.cljs[]
+----
 
 ```
 
